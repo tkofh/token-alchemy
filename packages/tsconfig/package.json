@@ -1,0 +1,10 @@
+{
+  "name": "@token-alchemy/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "./base.json",
+  "publishConfig": {
+    "access": "public"
+  }
+}
