@@ -23,6 +23,7 @@ module.exports = {
   },
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
+    '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
   },
   ignorePatterns: ['node_modules/', 'dist/'],
   overrides: [

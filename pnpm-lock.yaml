@@ -35,6 +35,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@token-alchemy/types':
+        specifier: workspace:*
+        version: link:../types
       defu:
         specifier: ^6.1.2
         version: 6.1.2
@@ -53,7 +56,7 @@ importers:
     devDependencies:
       '@token-alchemy/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config-custom
+        version: link:../eslint-config
       '@token-alchemy/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
@@ -70,7 +73,7 @@ importers:
         specifier: ^0.34.3
         version: 0.34.3
 
-  packages/eslint-config-custom:
+  packages/eslint-config:
     devDependencies:
       '@vercel/style-guide':
         specifier: ^5.0.1
@@ -80,6 +83,18 @@ importers:
         version: 1.10.13(eslint@8.48.0)
 
   packages/tsconfig: {}
+
+  packages/types:
+    devDependencies:
+      '@token-alchemy/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@token-alchemy/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsup:
+        specifier: ^7.2.0
+        version: 7.2.0(ts-node@10.9.1)(typescript@5.2.2)
 
 packages:
 
