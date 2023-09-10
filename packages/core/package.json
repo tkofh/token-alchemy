@@ -8,9 +8,16 @@
   "devDependencies": {
     "@token-alchemy/eslint-config": "workspace:*",
     "@token-alchemy/tsconfig": "workspace:*",
-    "@types/node": "^20.5.4",
+    "@types/node": "^20.5.9",
     "tsup": "^7.2.0",
-    "typescript": "^5.1.6",
-    "vitest": "^0.34.2"
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.3"
+  },
+  "dependencies": {
+    "defu": "^6.1.2",
+    "untyped": "^1.4.0",
+    "zod": "^3.22.2",
+    "zod-to-json-schema": "^3.21.4",
+    "zod-to-ts": "^1.2.0"
   }
 }
