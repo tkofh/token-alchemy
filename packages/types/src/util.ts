@@ -87,3 +87,18 @@ export type ExtractKeys<T> = T extends object ? keyof T : never
 export type SubsetOf<T> =
   | T
   | (T extends object ? { [K in keyof T]: T[K] }[keyof T] : never)
+
+export type ReplaceProperties<T, Augment> =
+  | Augment
+  | (T extends object
+      ? { [K in keyof T]: ReplaceProperties<T[K], Augment> }
+      : never)
+
+export type JSValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { [x: string]: JSValue }
+  | JSValue[]

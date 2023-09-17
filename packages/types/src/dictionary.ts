@@ -4,37 +4,51 @@ import type {
   DesignTokenValue,
   ExtractedTokenGroupAttributes,
 } from './tokens'
-import type { ExtractKeys, Immutable, OneOrBoth, SubsetOf } from './util'
+import type {
+  ReplaceProperties,
+  // ExtractKeys,
+  Immutable,
+  OneOrBoth,
+  // SubsetOf,
+} from './util'
 
 export interface ResolvedTokenPathSegment {
-  readonly segmentKey: string
-  readonly attributes: ExtractedTokenGroupAttributes
+  segmentKey: string
+  attributes: ExtractedTokenGroupAttributes
+}
+
+export interface ResolvedTokenValueReference {
+  $ref: ResolvedToken
 }
 
 export interface ResolvedToken {
-  readonly key: string
-  readonly attributes: Immutable<OneOrBoth<DesignToken, DesignTokenGroup>>
-  readonly value: DesignTokenValue
-  readonly path: readonly ResolvedTokenPathSegment[]
+  key: string
+  attributes: OneOrBoth<DesignToken, DesignTokenGroup>
+  value: DesignTokenValue
+  valueReferences: ReplaceProperties<
+    DesignTokenValue,
+    ResolvedTokenValueReference | null
+  > | null
+  path: ResolvedTokenPathSegment[]
 }
 
-interface TokenReference {
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- type could be extended in user land
-  readonly key: '$value' | ExtractKeys<DesignTokenValue>
-  readonly token: ResolvedToken
-}
+// interface TokenReference {
+//   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- type could be extended in user land
+//   key: '$value' | ExtractKeys<DesignTokenValue>
+//   token: ResolvedToken
+// }
 
-export type TokenResolverFilter = (
-  token: ResolvedToken,
-  branch: ReadonlySet<string>,
-) => SubsetOf<DesignTokenValue>
+// export type TokenResolverFilter = (
+//   token: ResolvedToken,
+//   branch: ReadonlySet<string>,
+// ) => SubsetOf<DesignTokenValue>
 
 export type TokenMap = Immutable<Map<string, ResolvedToken>>
 
 export interface TokenDictionary {
   readonly tokens: TokenMap
-  readonly getReferences: (
-    token: ResolvedToken,
-    filter?: TokenResolverFilter,
-  ) => Immutable<TokenReference>
+  // readonly getReferences: (
+  //   token: Immutable<ResolvedToken>,
+  //   filter?: TokenResolverFilter,
+  // ) => Immutable<TokenReference>
 }

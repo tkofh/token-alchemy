@@ -1,14 +1,23 @@
 import type {
+  DesignToken,
+  DesignTokenGroup,
   DesignTokens,
   ExtractedTokenGroupAttributes,
-  ExtractedTokenAttributes,
+  // ExtractedTokenAttributes,
   TokenKey,
 } from '@token-alchemy/types'
+import { REFERENCE_RE } from './constants'
 
 export function objectEntries<T extends object>(
   input: T,
 ): Array<{ [K in keyof T]: [K, T[K]] }[keyof T]> {
   return Object.entries(input) as Array<{ [K in keyof T]: [K, T[K]] }[keyof T]>
+}
+
+export function isToken(
+  tokens: DesignTokens,
+): tokens is DesignToken & DesignTokenGroup {
+  return '$value' in tokens
 }
 
 export function extractGroupAttributes(
@@ -23,22 +32,14 @@ export function extractGroupAttributes(
   ) as ExtractedTokenGroupAttributes
 }
 
-export function extractTokenAttributes(
-  input: DesignTokens,
-): ExtractedTokenAttributes {
-  return Object.fromEntries(
-    Object.keys(input)
-      .filter((key): key is keyof ExtractedTokenAttributes =>
-        key.startsWith('$'),
-      )
-      .map((key) => [key, input[key]]),
-  ) as ExtractedTokenAttributes
-}
-
 export function extractGroupChildren(
   input: DesignTokens,
 ): Array<[TokenKey, DesignTokens]> {
   return Object.keys(input)
     .filter((key): key is TokenKey => !key.startsWith('$'))
     .map((key) => [key, input[key]])
+}
+
+export function isReference(input: unknown): input is string {
+  return typeof input === 'string' && REFERENCE_RE.test(input)
 }
