@@ -1,5 +1,5 @@
-import type { DesignTokens } from '@token-alchemy/types'
+import type { DesignTokensInput } from '@token-alchemy/types'
 
-export function defineTokens(tokens: DesignTokens): DesignTokens {
+export function defineTokens(tokens: DesignTokensInput): DesignTokensInput {
   return tokens
 }

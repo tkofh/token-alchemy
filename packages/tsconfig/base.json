@@ -4,7 +4,6 @@
   "compilerOptions": {
     "composite": false,
     "noEmit": true,
-    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "inlineSources": false,

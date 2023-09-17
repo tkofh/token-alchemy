@@ -13,11 +13,13 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix .",
+    "test": "vitest"
   },
   "devDependencies": {
     "@token-alchemy/eslint-config": "workspace:*",
     "@token-alchemy/tsconfig": "workspace:*",
+    "@types/lodash-es": "^4.17.9",
     "@types/node": "^20.5.9",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
@@ -25,6 +27,7 @@
   },
   "dependencies": {
     "@token-alchemy/types": "workspace:*",
-    "defu": "^6.1.2"
+    "defu": "^6.1.2",
+    "lodash-es": "^4.17.21"
   }
 }

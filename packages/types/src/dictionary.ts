@@ -1,26 +1,40 @@
 import type {
-  ResolvedDesignTokenAttributes,
-  ResolvedDesignTokenGroupAttributes,
+  DesignToken,
+  DesignTokenGroup,
   DesignTokenValue,
+  ExtractedTokenGroupAttributes,
 } from './tokens'
-import type { OneOrBoth } from './util'
+import type { ExtractKeys, Immutable, OneOrBoth, SubsetOf } from './util'
 
-interface DictionaryTokenPathSegment {
-  segmentKey: string
-  attributes: OneOrBoth<
-    ResolvedDesignTokenGroupAttributes,
-    ResolvedDesignTokenAttributes
-  >
+export interface ResolvedTokenPathSegment {
+  readonly segmentKey: string
+  readonly attributes: ExtractedTokenGroupAttributes
 }
 
-export interface DictionaryToken {
-  key: string
-  attributes: OneOrBoth<
-    ResolvedDesignTokenAttributes,
-    ResolvedDesignTokenGroupAttributes
-  >
-  value: DesignTokenValue
-  path: DictionaryTokenPathSegment[]
+export interface ResolvedToken {
+  readonly key: string
+  readonly attributes: Immutable<OneOrBoth<DesignToken, DesignTokenGroup>>
+  readonly value: DesignTokenValue
+  readonly path: readonly ResolvedTokenPathSegment[]
 }
 
-export interface Dictionary {}
+interface TokenReference {
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- type could be extended in user land
+  readonly key: '$value' | ExtractKeys<DesignTokenValue>
+  readonly token: ResolvedToken
+}
+
+export type TokenResolverFilter = (
+  token: ResolvedToken,
+  branch: ReadonlySet<string>,
+) => SubsetOf<DesignTokenValue>
+
+export type TokenMap = Immutable<Map<string, ResolvedToken>>
+
+export interface TokenDictionary {
+  readonly tokens: TokenMap
+  readonly getReferences: (
+    token: ResolvedToken,
+    filter?: TokenResolverFilter,
+  ) => Immutable<TokenReference>
+}

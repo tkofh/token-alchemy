@@ -1,4 +1,10 @@
-import type { Alphabet, Numerals } from './util'
+import type {
+  Alphabet,
+  DollarPrefix,
+  Immutable,
+  Numerals,
+  OneOrBoth,
+} from './util'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface -- extended in user land
 export interface DesignTokenAttributes {}
@@ -8,32 +14,35 @@ export interface DesignTokenGroupAttributes {}
 
 type TokenPrefix = Alphabet | Uppercase<Alphabet> | Numerals
 
-type TokenKey = `${TokenPrefix}${string}`
+export type TokenKey = `${TokenPrefix}${string}`
 
-type TokenReservedKeys = '$value'
-
-export type ResolvedDesignTokenAttributes = Omit<
-  DesignTokenAttributes,
-  TokenReservedKeys
->
-
-export type ResolvedDesignTokenGroupAttributes = Omit<
-  DesignTokenGroupAttributes,
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- DesignTokenAttributes extended in user land
-  TokenReservedKeys | keyof ResolvedDesignTokenAttributes
->
-
-export type DesignTokenValue = string | number
-
-export interface DesignToken
-  extends ResolvedDesignTokenAttributes,
-    ResolvedDesignTokenGroupAttributes {
-  $value: DesignTokenValue
+export type DesignToken = Omit<
+  DollarPrefix<DesignTokenAttributes>,
+  '$value'
+> & {
+  $value: NonNullable<
+    DollarPrefix<DesignTokenAttributes> extends { $value: infer TValue }
+      ? TValue
+      : string | number
+  >
 }
 
-export type DesignTokens = (
-  | DesignToken
-  | ResolvedDesignTokenGroupAttributes
-) & {
+export type DesignTokenValue = DesignToken['$value']
+
+export type DesignTokenGroup = Omit<
+  DollarPrefix<DesignTokenGroupAttributes>,
+  keyof DesignToken
+>
+
+export type DesignTokens = OneOrBoth<DesignTokenGroup, DesignToken> & {
   [K in TokenKey]: DesignTokens
 }
+
+export type DesignTokensInput = Record<TokenKey, DesignTokens>
+
+export type ExtractedTokenAttributes = Immutable<
+  OneOrBoth<DesignToken, DesignTokenGroup>
+>
+export type ExtractedTokenGroupAttributes = Immutable<
+  OneOrBoth<DesignTokenGroup, DesignToken>
+>
