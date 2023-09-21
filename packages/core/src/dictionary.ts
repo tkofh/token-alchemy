@@ -6,6 +6,7 @@ import type {
   DesignTokens,
   ExtractedTokenAttributes,
   JSValue,
+  TokenDictionary,
 } from '@token-alchemy/types'
 import { kebabCase } from 'lodash-es'
 import {
@@ -31,7 +32,7 @@ function resolveTokenReferences(
     throw new Error(
       `Circular reference between \`${chain
         .slice(chain.indexOf(token))
-        .map((loopToken) => `'${loopToken.key}'`)
+        .map((loopToken) => `'${loopToken.reference}'`)
         .join(', ')}\``,
     )
   } else if (!resolved.has(token.key)) {
@@ -74,7 +75,6 @@ function resolveReferences(
   } else if (typeof value === 'object' && value !== null) {
     const valueReferencesEntries: Array<[string, JSValue]> = []
     const valueEntries: Array<[string, JSValue]> = []
-    let isNull = true
 
     for (const [key, childValue] of Object.entries(value)) {
       const child = resolveReferences(
@@ -85,19 +85,13 @@ function resolveReferences(
         chain,
       )
 
-      if (child.valueReferences !== null) {
-        isNull = false
-      }
-
       valueReferencesEntries.push([key, child.valueReferences])
       valueEntries.push([key, child.value])
     }
 
     return {
       value: Object.fromEntries(valueEntries),
-      valueReferences: isNull
-        ? null
-        : Object.fromEntries(valueReferencesEntries),
+      valueReferences: Object.fromEntries(valueReferencesEntries),
     }
   }
   return {
@@ -127,10 +121,12 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
       const { lineage, tokens } = element
 
       if (isToken(tokens)) {
-        const key = `{${lineage.map(({ segmentKey }) => segmentKey).join('.')}}`
+        const keyParts = lineage.map(({ segmentKey }) => segmentKey)
+        const reference = `{${keyParts.join('.')}}`
 
-        tokenMap.set(key, {
-          key,
+        tokenMap.set(reference, {
+          key: keyParts.join('-'),
+          reference,
           attributes: lineage[lineage.length - 1]
             .attributes as ExtractedTokenAttributes,
           value: tokens.$value,
@@ -172,8 +168,8 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
   return tokenMap
 }
 
-// export function createDictionary(input: DesignTokensInput): TokenDictionary {
-//   const tokens = resolveTokens(input)
+export function createDictionary(input: DesignTokensInput): TokenDictionary {
+  const tokens = resolveTokens(input)
 
-//   return { tokens }
-// }
+  return { tokens }
+}

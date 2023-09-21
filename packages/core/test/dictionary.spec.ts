@@ -58,6 +58,12 @@ describe('resolveTokens', () => {
     ).toBeDefined()
   })
 
+  test('it resolves direct child tokens', ({ expect }) => {
+    const tokens = resolveTokens({ a: { $value: 'a', b: { $value: 'b' } } })
+    expect(tokens.get('{a}')).toBeDefined()
+    expect(tokens.get('{a.b}')).toBeDefined()
+  })
+
   test('it resolves aliases', ({ expect }) => {
     const expectedValue = 'hello'
     const tokens = resolveTokens({
@@ -109,6 +115,29 @@ describe('resolveTokens', () => {
     expect(complex?.valueReferences).toStrictEqual({
       light: { $ref: tokens.get('{light}') },
       dark: { $ref: tokens.get('{dark}') },
+    })
+  })
+
+  test('it preserves structure of complex non-referenced values', ({
+    expect,
+  }) => {
+    const tokens = resolveTokens({
+      a: { $value: 'a' },
+      b: { $value: 'b' },
+      c: {
+        // @ts-expect-error -- can't declare module types locally
+        $value: {
+          a1: { a2: '{a}', b2: 'hello' },
+          b1: { a2: { a3: 'a3', b3: 'b3' }, b2: '{b}' },
+        },
+      },
+    })
+
+    const token = tokens.get('{c}')
+    expect(token).toBeDefined()
+    expect(token?.valueReferences).toStrictEqual({
+      a1: { a2: { $ref: tokens.get('{a}') }, b2: null },
+      b1: { a2: { a3: null, b3: null }, b2: { $ref: tokens.get('{b}') } },
     })
   })
 })

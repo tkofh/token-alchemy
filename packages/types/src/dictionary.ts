@@ -4,13 +4,7 @@ import type {
   DesignTokenValue,
   ExtractedTokenGroupAttributes,
 } from './tokens'
-import type {
-  ReplaceProperties,
-  // ExtractKeys,
-  Immutable,
-  OneOrBoth,
-  // SubsetOf,
-} from './util'
+import type { ReplaceProperties, Immutable, OneOrBoth } from './util'
 
 export interface ResolvedTokenPathSegment {
   segmentKey: string
@@ -23,6 +17,7 @@ export interface ResolvedTokenValueReference {
 
 export interface ResolvedToken {
   key: string
+  reference: string
   attributes: OneOrBoth<DesignToken, DesignTokenGroup>
   value: DesignTokenValue
   valueReferences: ReplaceProperties<
@@ -32,23 +27,8 @@ export interface ResolvedToken {
   path: ResolvedTokenPathSegment[]
 }
 
-// interface TokenReference {
-//   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- type could be extended in user land
-//   key: '$value' | ExtractKeys<DesignTokenValue>
-//   token: ResolvedToken
-// }
-
-// export type TokenResolverFilter = (
-//   token: ResolvedToken,
-//   branch: ReadonlySet<string>,
-// ) => SubsetOf<DesignTokenValue>
-
 export type TokenMap = Immutable<Map<string, ResolvedToken>>
 
 export interface TokenDictionary {
   readonly tokens: TokenMap
-  // readonly getReferences: (
-  //   token: Immutable<ResolvedToken>,
-  //   filter?: TokenResolverFilter,
-  // ) => Immutable<TokenReference>
 }
