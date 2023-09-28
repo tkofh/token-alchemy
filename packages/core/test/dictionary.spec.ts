@@ -76,9 +76,9 @@ describe('resolveTokens', () => {
     })
 
     expect(tokens.get('{a}')?.value).toBe(expectedValue)
-    expect(tokens.get('{a}')?.valueReferences).toStrictEqual({
-      $ref: tokens.get('{b}'),
-    })
+    expect(tokens.get('{a}')?.references).toStrictEqual(
+      new Map([['$value', tokens.get('{b}')]]),
+    )
   })
 
   test('it handles unknown references', ({ expect }) => {
@@ -86,7 +86,9 @@ describe('resolveTokens', () => {
       resolveTokens({
         a: { $value: '{b}' },
       }),
-    ).toThrowError("Unable to resolveTokens: Unknown reference `'{b}'`")
+    ).toThrowError(
+      "Unable to resolve token `a` reference: Unknown reference `'{b}'`",
+    )
   })
 
   test('it handles circular references', ({ expect }) => {
@@ -97,7 +99,7 @@ describe('resolveTokens', () => {
         c: { $value: '{a.a}' },
       }),
     ).toThrowError(
-      "Unable to resolveTokens: Circular reference between `'{b}', '{c}', '{a.a}'`",
+      "Unable to resolve token `b` reference: Circular reference between `'{b}', '{c}', '{a.a}'`",
     )
   })
 
@@ -112,32 +114,11 @@ describe('resolveTokens', () => {
 
     const complex = tokens.get('{complex}')
     expect(complex?.value).toStrictEqual({ light: 'light', dark: 'dark' })
-    expect(complex?.valueReferences).toStrictEqual({
-      light: { $ref: tokens.get('{light}') },
-      dark: { $ref: tokens.get('{dark}') },
-    })
-  })
-
-  test('it preserves structure of complex non-referenced values', ({
-    expect,
-  }) => {
-    const tokens = resolveTokens({
-      a: { $value: 'a' },
-      b: { $value: 'b' },
-      c: {
-        // @ts-expect-error -- can't declare module types locally
-        $value: {
-          a1: { a2: '{a}', b2: 'hello' },
-          b1: { a2: { a3: 'a3', b3: 'b3' }, b2: '{b}' },
-        },
-      },
-    })
-
-    const token = tokens.get('{c}')
-    expect(token).toBeDefined()
-    expect(token?.valueReferences).toStrictEqual({
-      a1: { a2: { $ref: tokens.get('{a}') }, b2: null },
-      b1: { a2: { a3: null, b3: null }, b2: { $ref: tokens.get('{b}') } },
-    })
+    expect(complex?.references).toStrictEqual(
+      new Map([
+        ['$value.light', tokens.get('{light}')],
+        ['$value.dark', tokens.get('{dark}')],
+      ]),
+    )
   })
 })

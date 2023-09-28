@@ -4,7 +4,7 @@ import type {
   DesignTokenValue,
   ExtractedTokenGroupAttributes,
 } from './tokens'
-import type { ReplaceProperties, Immutable, OneOrBoth } from './util'
+import type { Immutable, OneOrBoth } from './util'
 
 export interface ResolvedTokenPathSegment {
   segmentKey: string
@@ -20,10 +20,7 @@ export interface ResolvedToken {
   reference: string
   attributes: OneOrBoth<DesignToken, DesignTokenGroup>
   value: DesignTokenValue
-  valueReferences: ReplaceProperties<
-    DesignTokenValue,
-    ResolvedTokenValueReference | null
-  > | null
+  references: Map<string, ResolvedToken>
   path: ResolvedTokenPathSegment[]
 }
 
