@@ -11,10 +11,6 @@ export interface ResolvedTokenPathSegment {
   attributes: ExtractedTokenGroupAttributes
 }
 
-export interface ResolvedTokenValueReference {
-  $ref: ResolvedToken
-}
-
 export interface ResolvedToken {
   key: string
   reference: string
