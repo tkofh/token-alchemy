@@ -1,7 +1,7 @@
 {
-  "name": "@token-alchemy/core",
+  "name": "@token-alchemy/cli",
   "version": "0.0.0",
-  "description": "Token utilities and operations",
+  "description": "CLI for working with tokens",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
   "sideEffects": false,
@@ -19,15 +19,9 @@
   "devDependencies": {
     "@token-alchemy/eslint-config": "workspace:*",
     "@token-alchemy/tsconfig": "workspace:*",
-    "@types/lodash-es": "^4.17.9",
-    "@types/node": "^20.5.9",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   },
-  "dependencies": {
-    "@token-alchemy/types": "workspace:*",
-    "defu": "^6.1.2",
-    "lodash-es": "^4.17.21"
-  }
+  "dependencies": {}
 }
