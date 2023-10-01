@@ -1,5 +1,11 @@
 # @token-alchemy/core
 
+## 0.1.2
+
+### Patch Changes
+
+- fix export info
+
 ## 0.1.1
 
 ### Patch Changes

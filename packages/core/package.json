@@ -1,6 +1,6 @@
 {
   "name": "@token-alchemy/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Token utilities and operations",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
