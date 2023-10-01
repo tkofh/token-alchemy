@@ -1,12 +1,13 @@
 {
   "name": "@token-alchemy/core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Token utilities and operations",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
   "module": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {

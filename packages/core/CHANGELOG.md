@@ -1,5 +1,13 @@
 # @token-alchemy/core
 
+## 0.1.3
+
+### Patch Changes
+
+- add main field to package.json
+- Updated dependencies
+  - @token-alchemy/types@0.1.1
+
 ## 0.1.2
 
 ### Patch Changes
