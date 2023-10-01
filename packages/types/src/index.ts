@@ -15,6 +15,6 @@ export type {
   ResolvedTokenPathSegment,
   TokenDictionary,
   TokenMap,
-  // TokenResolverFilter,
+  SerializedToken,
 } from './dictionary'
 export type { JSValue, Immutable } from './util'

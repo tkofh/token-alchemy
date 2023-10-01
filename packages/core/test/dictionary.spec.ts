@@ -1,6 +1,6 @@
 import { describe, test } from 'vitest'
 import type { DesignTokens } from '@token-alchemy/types'
-import { resolveTokens } from '../src/dictionary'
+import { createDictionary, deserializeDictionary } from '../src'
 
 // declare module '@token-alchemy/types' {
 //   export interface DesignTokenAttributes {
@@ -13,9 +13,9 @@ import { resolveTokens } from '../src/dictionary'
 //   }
 // }
 
-describe('resolveTokens', () => {
+describe('createDictionary', () => {
   test('it resolves root-level tokens', ({ expect }) => {
-    const tokens = resolveTokens({
+    const tokens = createDictionary({
       tokenA: {
         $value: 'token',
       },
@@ -38,7 +38,7 @@ describe('resolveTokens', () => {
       },
     )
 
-    const tokens = resolveTokens(input)
+    const tokens = createDictionary(input)
 
     expect(
       tokens.get(
@@ -59,14 +59,14 @@ describe('resolveTokens', () => {
   })
 
   test('it resolves direct child tokens', ({ expect }) => {
-    const tokens = resolveTokens({ a: { $value: 'a', b: { $value: 'b' } } })
+    const tokens = createDictionary({ a: { $value: 'a', b: { $value: 'b' } } })
     expect(tokens.get('{a}')).toBeDefined()
     expect(tokens.get('{a.b}')).toBeDefined()
   })
 
   test('it resolves aliases', ({ expect }) => {
     const expectedValue = 'hello'
-    const tokens = resolveTokens({
+    const tokens = createDictionary({
       a: {
         $value: '{b}',
       },
@@ -83,7 +83,7 @@ describe('resolveTokens', () => {
 
   test('it handles unknown references', ({ expect }) => {
     expect(() =>
-      resolveTokens({
+      createDictionary({
         a: { $value: '{b}' },
       }),
     ).toThrowError(
@@ -93,7 +93,7 @@ describe('resolveTokens', () => {
 
   test('it handles circular references', ({ expect }) => {
     expect(() =>
-      resolveTokens({
+      createDictionary({
         a: { a: { $value: '{b}' } },
         b: { $value: '{c}' },
         c: { $value: '{a.a}' },
@@ -104,7 +104,7 @@ describe('resolveTokens', () => {
   })
 
   test('it handles complex value references', ({ expect }) => {
-    const tokens = resolveTokens({
+    const tokens = createDictionary({
       light: { $value: 'light' },
       dark: { $value: 'dark' },
 
@@ -120,5 +120,22 @@ describe('resolveTokens', () => {
         ['$value.dark', tokens.get('{dark}')],
       ]),
     )
+  })
+
+  test('it serializes and deserializes', ({ expect }) => {
+    const tokens = createDictionary({
+      a: {
+        $value: 'foo',
+      },
+      b: {
+        $value: '{a}',
+      },
+    })
+    const serialized = tokens.serialize()
+
+    const otherTokens = deserializeDictionary(serialized)
+
+    expect(otherTokens.get('{a}')).toBeDefined()
+    expect(otherTokens.get('{b}')).toBeDefined()
   })
 })

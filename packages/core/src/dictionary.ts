@@ -1,86 +1,28 @@
 import type {
   DesignTokensInput,
-  TokenMap,
-  ResolvedToken,
-  ResolvedTokenPathSegment,
-  DesignTokens,
-  ExtractedTokenAttributes,
   TokenDictionary,
+  TokenMap,
 } from '@token-alchemy/types'
-import { kebabCase } from 'lodash-es'
-import {
-  extractGroupAttributes,
-  extractGroupChildren,
-  isToken,
-  objectEntries,
-} from './util'
-import { resolveTokenMapReferences } from './references'
+import { resolveTokens } from './resolve'
+import { deserializeTokenMap, serializeTokenMap } from './serialize'
 
-interface TokenResolutionOperation {
-  lineage: ResolvedTokenPathSegment[]
-  tokens: DesignTokens
-}
-
-export function resolveTokens(input: DesignTokensInput): TokenMap {
-  const tokenMap = new Map<string, ResolvedToken>()
-
-  const queue: TokenResolutionOperation[] = objectEntries(input).map(
-    ([key, value]) => ({
-      lineage: [
-        {
-          segmentKey: kebabCase(key),
-          attributes: extractGroupAttributes(value),
-        },
-      ],
-      tokens: value,
-    }),
-  )
-
-  while (queue.length > 0) {
-    const element = queue.shift()
-    if (element != null) {
-      const { lineage, tokens } = element
-
-      if (isToken(tokens)) {
-        const keyParts = lineage.map(({ segmentKey }) => segmentKey)
-        const reference = `{${keyParts.join('.')}}`
-
-        tokenMap.set(reference, {
-          key: keyParts.join('-'),
-          reference,
-          attributes: lineage[lineage.length - 1]
-            .attributes as ExtractedTokenAttributes,
-          value: tokens.$value,
-          references: new Map(),
-          path: lineage,
-        })
-      }
-
-      const children = extractGroupChildren(tokens)
-      if (children.length > 0) {
-        for (const [segmentKey, childTokens] of children) {
-          queue.push({
-            lineage: [
-              ...lineage,
-              {
-                segmentKey: kebabCase(segmentKey),
-                attributes: extractGroupAttributes(childTokens),
-              },
-            ],
-            tokens: childTokens,
-          })
-        }
-      }
-    }
+function createDictionaryImpl(tokens: TokenMap): TokenDictionary {
+  return {
+    all: () => tokens.values(),
+    get: (key) => tokens.get(key),
+    has: (key) => tokens.has(key),
+    serialize: (pretty = false) => serializeTokenMap(tokens, pretty),
   }
-
-  resolveTokenMapReferences(tokenMap)
-
-  return tokenMap
 }
 
 export function createDictionary(input: DesignTokensInput): TokenDictionary {
   const tokens = resolveTokens(input)
 
-  return { tokens }
+  return createDictionaryImpl(tokens)
+}
+
+export function deserializeDictionary(serialized: string): TokenDictionary {
+  const tokens = deserializeTokenMap(serialized)
+
+  return createDictionaryImpl(tokens)
 }

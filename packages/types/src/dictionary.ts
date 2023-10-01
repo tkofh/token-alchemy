@@ -20,8 +20,15 @@ export interface ResolvedToken {
   path: ResolvedTokenPathSegment[]
 }
 
-export type TokenMap = Immutable<Map<string, ResolvedToken>>
+export type TokenMap = ReadonlyMap<string, ResolvedToken>
 
 export interface TokenDictionary {
-  readonly tokens: TokenMap
+  readonly all: () => IterableIterator<Immutable<ResolvedToken>>
+  readonly get: (key: string) => Immutable<ResolvedToken> | undefined
+  readonly has: (key: string) => boolean
+  readonly serialize: (pretty?: boolean) => string
+}
+
+export interface SerializedToken extends Omit<ResolvedToken, 'references'> {
+  references: Record<string, string>
 }
