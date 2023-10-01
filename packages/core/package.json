@@ -1,21 +1,19 @@
 {
   "name": "@token-alchemy/core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Token utilities and operations",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
-  "module": "./dist/index.js",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "main": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -23,7 +21,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "unbuild",
     "lint": "eslint --fix .",
     "test:watch": "vitest",
     "test": "vitest run"
@@ -34,8 +32,8 @@
     "@types/lodash-es": "^4.17.9",
     "@types/node": "^20.5.9",
     "changelogen": "^0.5.5",
-    "tsup": "^7.2.0",
     "typescript": "^5.2.2",
+    "unbuild": "^2.0.0",
     "vitest": "^0.34.3"
   },
   "dependencies": {

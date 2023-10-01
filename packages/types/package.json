@@ -1,21 +1,19 @@
 {
   "name": "@token-alchemy/types",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Type definitions for Token Alchemy",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
-  "module": "./dist/index.js",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "main": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -24,11 +22,11 @@
   },
   "scripts": {
     "lint": "eslint --fix .",
-    "build": "tsup"
+    "build": "unbuild"
   },
   "devDependencies": {
     "@token-alchemy/eslint-config": "workspace:*",
     "@token-alchemy/tsconfig": "workspace:*",
-    "tsup": "^7.2.0"
+    "unbuild": "^2.0.0"
   }
 }

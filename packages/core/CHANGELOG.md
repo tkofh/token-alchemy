@@ -1,5 +1,13 @@
 # @token-alchemy/core
 
+## 0.1.5
+
+### Patch Changes
+
+- switch to unbuild
+- Updated dependencies
+  - @token-alchemy/types@0.1.3
+
 ## 0.1.4
 
 ### Patch Changes
