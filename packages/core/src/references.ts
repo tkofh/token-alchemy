@@ -5,7 +5,7 @@ export function resolveTokenMapReferences(tokens: TokenMap): void {
   const resolved = new Set<string>()
   for (const token of tokens.values()) {
     try {
-      resolveTokenReferences(token as ResolvedToken, tokens, resolved, [])
+      resolveTokenReferences(token , tokens, resolved, [])
     } catch (e) {
       throw new Error(
         `Unable to resolve token \`${token.key}\` reference: ${
@@ -52,7 +52,7 @@ function resolveReferences(
   chain: ResolvedToken[],
 ): { value: JSValue; references: Array<[string, ResolvedToken]> } {
   if (isReference(value)) {
-    const referencedToken = tokens.get(value) as ResolvedToken | undefined
+    const referencedToken = tokens.get(value) 
 
     if (!referencedToken) {
       throw new Error(

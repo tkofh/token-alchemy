@@ -13,14 +13,19 @@
     "access": "public"
   },
   "scripts": {
+    "build": "tsup",
     "lint": "eslint --fix .",
-    "test": "vitest"
+    "release": "release-it",
+    "test:watch": "vitest",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@token-alchemy/eslint-config": "workspace:*",
     "@token-alchemy/tsconfig": "workspace:*",
     "@types/lodash-es": "^4.17.9",
     "@types/node": "^20.5.9",
+    "changelogen": "^0.5.5",
+    "release-it": "^16.2.1",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
@@ -30,5 +35,17 @@
     "defu": "^6.1.2",
     "lodash-es": "^4.17.21",
     "zod": "^3.22.2"
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore(release): release v${version}"
+    },
+    "github": {
+      "release": true,
+      "releaseName": "v${version}"
+    },
+    "hooks": {
+      "after:bump": "pnpm exec changelogen@latest --no-commit --no-tag --output --r $(node -p \"require('./package.json').version\")"
+    }
   }
 }

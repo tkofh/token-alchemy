@@ -1,6 +1,7 @@
 {
   "name": "@token-alchemy/cli",
   "version": "0.0.0",
+  "private": true,
   "description": "CLI for working with tokens",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",

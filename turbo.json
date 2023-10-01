@@ -8,13 +8,14 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "persistent": true,
-      "cache": false
+      "cache": true
     },
-    "lint": {},
-    "dev": {
-      "cache": false,
-      "persistent": true
+    "lint": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "release": {
+      "dependsOn": ["lint", "build", "test"]
     }
   }
 }
