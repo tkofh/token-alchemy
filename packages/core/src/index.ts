@@ -1,4 +1,5 @@
 export { createDictionary, deserializeDictionary } from './dictionary'
+export { defineTokens } from './helpers'
 export type {
   TokenDictionary,
   DesignTokens,
