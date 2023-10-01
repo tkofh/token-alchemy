@@ -14,8 +14,7 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "eslint --fix .",
-    "test": "vitest"
+    "lint": "eslint --fix ."
   },
   "devDependencies": {
     "@token-alchemy/eslint-config": "workspace:*",

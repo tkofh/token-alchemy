@@ -13,9 +13,6 @@
     "lint": {
       "dependsOn": ["^build"],
       "cache": true
-    },
-    "release": {
-      "dependsOn": ["lint", "build", "test"]
     }
   }
 }
