@@ -3,10 +3,9 @@ import type {
   DesignTokenGroup,
   DesignTokens,
   ExtractedTokenGroupAttributes,
-  // ExtractedTokenAttributes,
   TokenKey,
 } from '@token-alchemy/types'
-import { REFERENCE_RE } from './constants'
+import { CONTAINS_REFERENCE_RE } from './constants'
 
 export function objectEntries<T extends object>(
   input: T,
@@ -38,8 +37,4 @@ export function extractGroupChildren(
   return Object.keys(input)
     .filter((key): key is TokenKey => !key.startsWith('$'))
     .map((key) => [key, input[key]])
-}
-
-export function isReference(input: unknown): input is string {
-  return typeof input === 'string' && REFERENCE_RE.test(input)
 }

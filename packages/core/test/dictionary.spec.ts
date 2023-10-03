@@ -2,17 +2,6 @@ import { describe, test } from 'vitest'
 import type { DesignTokens } from '@token-alchemy/types'
 import { createDictionary, deserializeDictionary } from '../src'
 
-// declare module '@token-alchemy/types' {
-//   export interface DesignTokenAttributes {
-//     $type: 'color' | 'dimension' | 'string'
-//   }
-
-//   export interface DesignTokenGroupAttributes {
-//     $tier: 'component' | 'category' | 'property' | 'state'
-//     $value: string | { light: string; dark: string }
-//   }
-// }
-
 describe('createDictionary', () => {
   test('it resolves root-level tokens', ({ expect }) => {
     const tokens = createDictionary({
@@ -77,7 +66,7 @@ describe('createDictionary', () => {
 
     expect(tokens.get('{a}')?.value).toBe(expectedValue)
     expect(tokens.get('{a}')?.references).toStrictEqual(
-      new Map([['$value', tokens.get('{b}')]]),
+      new Map([['$value', [{ start: 0, end: 3, token: tokens.get('{b}') }]]]),
     )
   })
 
@@ -116,8 +105,28 @@ describe('createDictionary', () => {
     expect(complex?.value).toStrictEqual({ light: 'light', dark: 'dark' })
     expect(complex?.references).toStrictEqual(
       new Map([
-        ['$value.light', tokens.get('{light}')],
-        ['$value.dark', tokens.get('{dark}')],
+        ['$value.light', [{ start: 0, end: 7, token: tokens.get('{light}') }]],
+        ['$value.dark', [{ start: 0, end: 6, token: tokens.get('{dark}') }]],
+      ]),
+    )
+  })
+
+  test('it handles multi reference values', ({ expect }) => {
+    const tokens = createDictionary({
+      a: { $value: 'a' },
+      b: { $value: 'b' },
+      c: { $value: '{a} {b}' },
+    })
+
+    expect(tokens.get('{c}')?.references).toStrictEqual(
+      new Map([
+        [
+          '$value',
+          [
+            { start: 0, end: 3, token: tokens.get('{a}') },
+            { start: 4, end: 7, token: tokens.get('{b}') },
+          ],
+        ],
       ]),
     )
   })

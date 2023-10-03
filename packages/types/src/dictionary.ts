@@ -11,12 +11,18 @@ export interface ResolvedTokenPathSegment {
   attributes: ExtractedTokenGroupAttributes
 }
 
+export interface TokenReference {
+  token: ResolvedToken
+  start: number
+  end: number
+}
+
 export interface ResolvedToken {
   key: string
   reference: string
   attributes: OneOrBoth<DesignToken, DesignTokenGroup>
   value: DesignTokenValue
-  references: Map<string, ResolvedToken>
+  references: Map<string, TokenReference[]>
   path: ResolvedTokenPathSegment[]
 }
 
