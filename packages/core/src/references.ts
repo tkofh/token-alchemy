@@ -1,15 +1,19 @@
-import type { TokenMap, ResolvedToken, JSValue } from '@token-alchemy/types'
-import { isReference } from './util'
+import type {
+  TokenMap,
+  ResolvedToken,
+  JSValue,
+  TokenReference,
+} from '@token-alchemy/types'
 
 export function resolveTokenMapReferences(tokens: TokenMap): void {
   const resolved = new Set<string>()
   for (const token of tokens.values()) {
     try {
-      resolveTokenReferences(token , tokens, resolved, [])
+      resolveTokenReferences(token, tokens, resolved, [])
     } catch (e) {
       throw new Error(
         `Unable to resolve token \`${token.key}\` reference: ${
-          e instanceof Error ? e.message : 'an unknown error occured'
+          e instanceof Error ? e.message : 'an unknown error occurred'
         }`,
       )
     }
@@ -50,24 +54,46 @@ function resolveReferences(
   tokens: TokenMap,
   resolved: Set<string>,
   chain: ResolvedToken[],
-): { value: JSValue; references: Array<[string, ResolvedToken]> } {
-  if (isReference(value)) {
-    const referencedToken = tokens.get(value) 
+): { value: JSValue; references: Array<[string, TokenReference[]]> } {
+  if (typeof value === 'string') {
+    const matches = Array.from(value.matchAll(/{[a-z-]+(?:.[a-z-]+)*}/g))
 
-    if (!referencedToken) {
-      throw new Error(
-        `Unknown reference \`'${value}'\` at \`${keys.join('.')}\``,
-      )
-    }
+    if (matches.length > 0) {
+      let resolvedValue = value
+      const references: TokenReference[] = []
 
-    resolveTokenReferences(referencedToken, tokens, resolved, chain)
+      for (const match of matches) {
+        const referencedToken = tokens.get(match[0])
 
-    return {
-      references: [[keys.join('.'), referencedToken]],
-      value: referencedToken.value,
+        if (!referencedToken) {
+          throw new Error(
+            `Unknown reference \`'${value}'\` at \`${keys.join('.')}\``,
+          )
+        }
+
+        resolveTokenReferences(referencedToken, tokens, resolved, chain)
+
+        const tokenReference: TokenReference = {
+          token: referencedToken,
+          start: match.index ?? 0,
+          end: (match.index ?? 0) + match[0].length,
+        }
+
+        references.push(tokenReference)
+
+        resolvedValue = resolvedValue.replace(
+          referencedToken.reference,
+          String(referencedToken.value),
+        )
+      }
+
+      return {
+        references: [[keys.join('.'), references]],
+        value: resolvedValue,
+      }
     }
   } else if (typeof value === 'object' && value !== null) {
-    const references: Array<[string, ResolvedToken]> = []
+    const references: Array<[string, TokenReference[]]> = []
     const valueEntries: Array<[string, JSValue]> = []
 
     for (const [key, childValue] of Object.entries(value)) {
