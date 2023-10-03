@@ -1,5 +1,11 @@
 # @token-alchemy/core
 
+## 1.0.1
+
+### Patch Changes
+
+- fixes numeric references
+
 ## 1.0.0
 
 ### Major Changes
