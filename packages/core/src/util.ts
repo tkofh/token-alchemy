@@ -5,7 +5,6 @@ import type {
   ExtractedTokenGroupAttributes,
   TokenKey,
 } from '@token-alchemy/types'
-import { CONTAINS_REFERENCE_RE } from './constants'
 
 export function objectEntries<T extends object>(
   input: T,
