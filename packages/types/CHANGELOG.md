@@ -1,5 +1,11 @@
 # @token-alchemy/types
 
+## 0.2.0
+
+### Minor Changes
+
+- a0d29d2: implement formatReferences in format package
+
 ## 0.1.3
 
 ### Patch Changes

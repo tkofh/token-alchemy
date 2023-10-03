@@ -1,6 +1,6 @@
 {
   "name": "@token-alchemy/format",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "Token formatting utilities",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
