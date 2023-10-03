@@ -1,5 +1,16 @@
 # @token-alchemy/core
 
+## 1.0.0
+
+### Major Changes
+
+- bump to 1.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @token-alchemy/types@1.0.0
+
 ## 0.2.0
 
 ### Minor Changes

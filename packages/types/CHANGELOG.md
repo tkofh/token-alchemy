@@ -1,5 +1,11 @@
 # @token-alchemy/types
 
+## 1.0.0
+
+### Major Changes
+
+- bump to 1.0
+
 ## 0.2.0
 
 ### Minor Changes
