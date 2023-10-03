@@ -62,11 +62,22 @@ describe('createDictionary', () => {
       b: {
         $value: expectedValue,
       },
+      1: {
+        $value: '{2}',
+      },
+      2: {
+        $value: expectedValue,
+      },
     })
 
     expect(tokens.get('{a}')?.value).toBe(expectedValue)
     expect(tokens.get('{a}')?.references).toStrictEqual(
       new Map([['$value', [{ start: 0, end: 3, token: tokens.get('{b}') }]]]),
+    )
+
+    expect(tokens.get('{1}')?.value).toBe(expectedValue)
+    expect(tokens.get('{1}')?.references).toStrictEqual(
+      new Map([['$value', [{ start: 0, end: 3, token: tokens.get('{2}') }]]]),
     )
   })
 

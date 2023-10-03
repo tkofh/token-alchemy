@@ -56,7 +56,7 @@ function resolveReferences(
   chain: ResolvedToken[],
 ): { value: JSValue; references: Array<[string, TokenReference[]]> } {
   if (typeof value === 'string') {
-    const matches = Array.from(value.matchAll(/{[a-z-]+(?:.[a-z-]+)*}/g))
+    const matches = Array.from(value.matchAll(/{[a-z0-9-]+(?:.[a-z0-9-]+)*}/g))
 
     if (matches.length > 0) {
       let resolvedValue = value
