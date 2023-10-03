@@ -35,6 +35,12 @@ export interface TokenDictionary {
   readonly serialize: (pretty?: boolean) => string
 }
 
+export interface SerializedTokenReference {
+  token: string
+  start: number
+  end: number
+}
+
 export interface SerializedToken extends Omit<ResolvedToken, 'references'> {
-  references: Record<string, string>
+  references: Record<string, SerializedTokenReference[]>
 }

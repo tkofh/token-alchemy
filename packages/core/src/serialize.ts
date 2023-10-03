@@ -4,23 +4,6 @@ import type {
   SerializedToken,
   ResolvedToken,
 } from '@token-alchemy/types'
-import { array, object, record, string, unknown } from 'zod'
-
-const serializedSchema = array(
-  object({
-    key: string(),
-    reference: string(),
-    attributes: record(string(), unknown()),
-    value: unknown(),
-    references: record(string(), string()),
-    path: array(
-      object({
-        segmentKey: string(),
-        attributes: record(string(), unknown()),
-      }),
-    ),
-  }),
-)
 
 export function serializeTokenMap(tokens: TokenMap, pretty = false): string {
   const serialized: Array<Immutable<SerializedToken>> = []
@@ -28,9 +11,12 @@ export function serializeTokenMap(tokens: TokenMap, pretty = false): string {
     serialized.push({
       ...token,
       references: Object.fromEntries(
-        Array.from(token.references.entries()).map(([key, { reference }]) => [
+        Array.from(token.references.entries()).map(([key, references]) => [
           key,
-          reference,
+          references.map((reference) => ({
+            ...reference,
+            token: token.reference,
+          })),
         ]),
       ),
     })
@@ -40,12 +26,12 @@ export function serializeTokenMap(tokens: TokenMap, pretty = false): string {
 }
 
 export function deserializeTokenMap(serialized: string): TokenMap {
-  const parsed = serializedSchema.parse(JSON.parse(serialized))
+  const parsed = JSON.parse(serialized) as SerializedToken[]
 
   const serializedTokenMap = new Map<string, SerializedToken>(
     parsed.map((serializedToken) => [
       serializedToken.reference,
-      serializedToken as SerializedToken,
+      serializedToken,
     ]),
   )
 
@@ -54,9 +40,14 @@ export function deserializeTokenMap(serialized: string): TokenMap {
     tokenMap.set(serializedToken.reference, {
       ...serializedToken,
       references: new Map(
-        Object.entries(serializedToken.references).map(([key, reference]) => [
+        Object.entries(serializedToken.references).map(([key, references]) => [
           key,
-          serializedTokenMap.get(reference) as unknown as ResolvedToken,
+          references.map((reference) => ({
+            ...reference,
+            token: serializedTokenMap.get(
+              reference.token,
+            ) as unknown as ResolvedToken,
+          })),
         ]),
       ),
     })

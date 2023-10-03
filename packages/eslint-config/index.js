@@ -33,5 +33,11 @@ module.exports = {
         'import/no-default-export': 'off',
       },
     },
+    {
+      files: ['*.test.ts'],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'off',
+      },
+    },
   ],
 }
