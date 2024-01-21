@@ -1,5 +1,8 @@
 pre-commit:
+  parallel: true
   commands:
+    lint-commit:
+      run: pnpm exec commitlint --from HEAD~1 --to HEAD
     check:
       glob: "*.{js,ts,json}"
       run: pnpm exec biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
