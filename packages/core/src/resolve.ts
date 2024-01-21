@@ -1,29 +1,30 @@
 import type {
+  DesignTokens,
   DesignTokensInput,
-  TokenMap,
+  ExtractedTokenAttributes,
   ResolvedToken,
   ResolvedTokenPathSegment,
-  DesignTokens,
-  ExtractedTokenAttributes,
+  TokenMap,
 } from '@token-alchemy/types'
 import { kebabCase } from 'lodash-es'
+import { resolveDependencies } from './dependencies'
+import { resolveReferences } from './references'
 import {
   extractGroupAttributes,
   extractGroupChildren,
   isToken,
   objectEntries,
 } from './util'
-import { resolveTokenMapReferences } from './references'
 
 interface TokenResolutionOperation {
-  lineage: ResolvedTokenPathSegment[]
+  lineage: Array<ResolvedTokenPathSegment>
   tokens: DesignTokens
 }
 
 export function resolveTokens(input: DesignTokensInput): TokenMap {
   const tokenMap = new Map<string, ResolvedToken>()
 
-  const queue: TokenResolutionOperation[] = objectEntries(input).map(
+  const queue: Array<TokenResolutionOperation> = objectEntries(input).map(
     ([key, value]) => ({
       lineage: [
         {
@@ -51,6 +52,7 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
             .attributes as ExtractedTokenAttributes,
           value: tokens.$value,
           references: new Map(),
+          dependencies: new Set(),
           path: lineage,
         })
       }
@@ -73,7 +75,8 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
     }
   }
 
-  resolveTokenMapReferences(tokenMap)
+  const tokensWithReferences = resolveReferences(tokenMap)
+  resolveDependencies(tokenMap, tokensWithReferences)
 
   return tokenMap
 }

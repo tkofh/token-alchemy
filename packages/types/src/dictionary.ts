@@ -11,7 +11,13 @@ export interface ResolvedTokenPathSegment {
   attributes: ExtractedTokenGroupAttributes
 }
 
-export interface TokenReference {
+export interface SerializedTokenReference {
+  reference: string
+  start: number
+  end: number
+}
+
+export interface ResolvedTokenReference {
   token: ResolvedToken
   start: number
   end: number
@@ -22,8 +28,9 @@ export interface ResolvedToken {
   reference: string
   attributes: OneOrBoth<DesignToken, DesignTokenGroup>
   value: DesignTokenValue
-  references: Map<string, TokenReference[]>
-  path: ResolvedTokenPathSegment[]
+  references: Map<string, Array<ResolvedTokenReference>>
+  dependencies: Set<ResolvedToken>
+  path: Array<ResolvedTokenPathSegment>
 }
 
 export type TokenMap = ReadonlyMap<string, ResolvedToken>
@@ -35,12 +42,8 @@ export interface TokenDictionary {
   readonly serialize: (pretty?: boolean) => string
 }
 
-export interface SerializedTokenReference {
-  token: string
-  start: number
-  end: number
-}
-
-export interface SerializedToken extends Omit<ResolvedToken, 'references'> {
-  references: Record<string, SerializedTokenReference[]>
+export interface SerializedToken
+  extends Omit<ResolvedToken, 'references' | 'dependencies'> {
+  references: Record<string, Array<SerializedTokenReference>>
+  dependencies: Array<string>
 }

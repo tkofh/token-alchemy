@@ -1,16 +1,16 @@
 import type {
+  DesignTokenValue,
   Immutable,
   ResolvedToken,
-  DesignTokenValue,
-  TokenReference,
+  ResolvedTokenReference,
 } from '@token-alchemy/types'
-import { set, get, cloneDeep } from 'lodash-es'
+import { cloneDeep, get, set } from 'lodash-es'
 
 type TokenFormatter = (token: Immutable<ResolvedToken>) => string
 
 function formatReferenceList(
   value: string,
-  references: Immutable<TokenReference[]>,
+  references: Immutable<Array<ResolvedTokenReference>>,
   format: TokenFormatter,
 ): string {
   let output = value

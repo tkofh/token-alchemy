@@ -37,27 +37,27 @@ export type MutuallyExclusive<A, B> =
 
 export type OneOrBoth<A, B> = MutuallyExclusive<A, A & B>
 
-type EnsureKeyDollarPrefix<TKey> = TKey extends `$${string}`
-  ? TKey
-  : TKey extends string
-  ? `$${TKey}`
-  : never
+type EnsureKeyDollarPrefix<Key> = Key extends `$${string}`
+  ? Key
+  : Key extends string
+    ? `$${Key}`
+    : never
 
-type StripKeyDollarPrefix<TPrefixedKey> = TPrefixedKey extends `$${infer TKey}`
-  ? TKey
-  : TPrefixedKey
+type StripKeyDollarPrefix<PrefixedKey> = PrefixedKey extends `$${infer Key}`
+  ? Key
+  : PrefixedKey
 
 type DollarPrefixValue<
-  TObject extends object,
-  TKey extends string,
-> = TObject extends { [K in EnsureKeyDollarPrefix<TKey>]: infer TValue }
-  ? TValue
-  : TObject extends { [K in StripKeyDollarPrefix<TKey>]: infer TValue }
-  ? TValue
-  : never
+  Object extends object,
+  Key extends string,
+> = Object extends { [K in EnsureKeyDollarPrefix<Key>]: infer Value }
+  ? Value
+  : Object extends { [K in StripKeyDollarPrefix<Key>]: infer Value }
+    ? Value
+    : never
 
-export type DollarPrefix<TObject extends object> = {
-  [K in EnsureKeyDollarPrefix<keyof TObject>]: DollarPrefixValue<TObject, K>
+export type DollarPrefix<Object extends object> = {
+  [K in EnsureKeyDollarPrefix<keyof Object>]: DollarPrefixValue<Object, K>
 }
 
 type ImmutablePrimitive =
@@ -66,7 +66,7 @@ type ImmutablePrimitive =
   | boolean
   | string
   | number
-  | ((...args: unknown[]) => unknown)
+  | ((...args: Array<unknown>) => unknown)
 
 type ImmutableArray<T> = ReadonlyArray<Immutable<T>>
 type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>
@@ -76,12 +76,12 @@ type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> }
 export type Immutable<T> = T extends ImmutablePrimitive
   ? T
   : T extends Array<infer U>
-  ? ImmutableArray<U>
-  : T extends Map<infer K, infer V>
-  ? ImmutableMap<K, V>
-  : T extends Set<infer M>
-  ? ImmutableSet<M>
-  : ImmutableObject<T>
+    ? ImmutableArray<U>
+    : T extends Map<infer K, infer V>
+      ? ImmutableMap<K, V>
+      : T extends Set<infer M>
+        ? ImmutableSet<M>
+        : ImmutableObject<T>
 
 export type ExtractKeys<T> = T extends object ? keyof T : never
 export type SubsetOf<T> =
@@ -94,11 +94,11 @@ export type SubsetOf<T> =
 //       ? { [K in keyof T]: ReplaceProperties<T[K], Augment> }
 //       : never)
 
-export type JSValue =
+export type JsValue =
   | string
   | number
   | boolean
   | null
   | undefined
-  | { [x: string]: JSValue }
-  | JSValue[]
+  | { [x: string]: JsValue }
+  | Array<JsValue>

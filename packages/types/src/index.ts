@@ -16,6 +16,7 @@ export type {
   SerializedToken,
   TokenDictionary,
   TokenMap,
-  TokenReference,
+  ResolvedTokenReference,
+  SerializedTokenReference,
 } from './dictionary'
-export type { JSValue, Immutable } from './util'
+export type { JsValue, Immutable } from './util'

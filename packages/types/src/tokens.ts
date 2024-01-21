@@ -6,11 +6,11 @@ import type {
   OneOrBoth,
 } from './util'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface -- extended in user land
-export interface DesignTokenAttributes {}
+// biome-ignore lint/complexity/noBannedTypes: This interface is extended in userland
+export type DesignTokenAttributes = {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface -- extended in user land
-export interface DesignTokenGroupAttributes {}
+// biome-ignore lint/complexity/noBannedTypes: This interface is extended in userland
+export type DesignTokenGroupAttributes = {}
 
 type TokenPrefix = Alphabet | Uppercase<Alphabet> | Numerals
 
@@ -21,8 +21,8 @@ export type DesignToken = Omit<
   '$value'
 > & {
   $value: NonNullable<
-    DollarPrefix<DesignTokenAttributes> extends { $value: infer TValue }
-      ? TValue
+    DollarPrefix<DesignTokenAttributes> extends { $value: infer Value }
+      ? Value
       : string | number
   >
 }

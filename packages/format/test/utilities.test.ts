@@ -1,5 +1,5 @@
-import { describe, test } from 'vitest'
 import { createDictionary } from '@token-alchemy/core'
+import { describe, test } from 'vitest'
 import { formatReferences } from '../src'
 
 describe('formatReferences', () => {
@@ -11,6 +11,7 @@ describe('formatReferences', () => {
     })
 
     const reformatted = formatReferences(
+      // biome-ignore lint/style/noNonNullAssertion: known key in test
       tokens.get('{c}')!,
       (token) => `ref-${token.key}`,
     )
@@ -27,6 +28,7 @@ describe('formatReferences', () => {
     })
 
     const reformatted = formatReferences(
+      // biome-ignore lint/style/noNonNullAssertion: known key in test
       tokens.get('{c}')!,
       (token) => `ref-${token.key}`,
     )
