@@ -1,7 +1,12 @@
 import type { ResolvedToken, TokenMap } from '@token-alchemy/types'
 
-function collectDirectDependencies(token: ResolvedToken): Set<ResolvedToken> {
-  const dependencies = new Set<ResolvedToken>()
+function collectDirectDependencies<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  token: ResolvedToken<Attributes, GroupAttributes>,
+): Set<ResolvedToken<Attributes, GroupAttributes>> {
+  const dependencies = new Set<ResolvedToken<Attributes, GroupAttributes>>()
 
   for (const reference of token.references.values()) {
     for (const { token: dependency } of reference) {
@@ -12,11 +17,14 @@ function collectDirectDependencies(token: ResolvedToken): Set<ResolvedToken> {
   return dependencies
 }
 
-function resolveTokenDependencies(
-  token: ResolvedToken,
-  tokens: TokenMap,
-  visited: Set<ResolvedToken>,
-  chain: Array<ResolvedToken>,
+function resolveTokenDependencies<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  token: ResolvedToken<Attributes, GroupAttributes>,
+  tokens: TokenMap<Attributes, GroupAttributes>,
+  visited: Set<ResolvedToken<Attributes, GroupAttributes>>,
+  chain: Array<ResolvedToken<Attributes, GroupAttributes>>,
 ) {
   if (chain.includes(token)) {
     throw new Error(
@@ -30,9 +38,16 @@ function resolveTokenDependencies(
   }
 
   if (!visited.has(token)) {
-    const dependencies = collectDirectDependencies(token)
+    const dependencies = collectDirectDependencies<Attributes, GroupAttributes>(
+      token,
+    )
     for (const dependency of dependencies) {
-      resolveTokenDependencies(dependency, tokens, visited, [...chain, token])
+      resolveTokenDependencies<Attributes, GroupAttributes>(
+        dependency,
+        tokens,
+        visited,
+        [...chain, token],
+      )
 
       token.dependencies.add(dependency)
       for (const sub of dependency.dependencies) {
@@ -44,15 +59,23 @@ function resolveTokenDependencies(
   }
 }
 
-export function resolveDependencies(
-  tokens: TokenMap,
-  tokensWithDependencies: Set<ResolvedToken>,
+export function resolveDependencies<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  tokens: TokenMap<Attributes, GroupAttributes>,
+  tokensWithDependencies: Set<ResolvedToken<Attributes, GroupAttributes>>,
 ) {
-  const visited = new Set<ResolvedToken>()
+  const visited = new Set<ResolvedToken<Attributes, GroupAttributes>>()
 
   for (const token of tokensWithDependencies) {
     try {
-      resolveTokenDependencies(token, tokens, visited, [])
+      resolveTokenDependencies<Attributes, GroupAttributes>(
+        token,
+        tokens,
+        visited,
+        [],
+      )
     } catch (e) {
       throw new Error(
         `Unable to resolve token \`${token.key}\` dependencies: ${

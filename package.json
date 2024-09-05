@@ -2,20 +2,21 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "test": "turbo run test",
     "dev": "turbo run dev",
-    "check": "biome check --apply-unsafe .",
+    "check": "biome check --write --unsafe .",
     "prepare": "lefthook install",
     "publish-packages": "turbo run build lint test && changeset version && changeset publish"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.5.2",
-    "@changesets/cli": "^2.27.1",
-    "@commitlint/cli": "^18.4.4",
-    "@commitlint/config-conventional": "^18.4.4",
+    "@biomejs/biome": "^1.8.3",
+    "@changesets/cli": "^2.27.8",
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1",
     "@repo/tsconfig": "workspace:*",
-    "lefthook": "^1.5.7",
-    "turbo": "^1.11.3"
+    "lefthook": "^1.7.15",
+    "turbo": "^2.1.1"
   },
-  "packageManager": "pnpm@8.14.1",
+  "packageManager": "pnpm@9.9.0",
   "name": "token-alchemy"
 }

@@ -6,12 +6,16 @@ import type {
 } from '@token-alchemy/types'
 import { TOKEN_REFERENCE_RE } from './constants'
 
-function resolveStringReferences(
+function resolveStringReferences<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
   input: string,
-  tokens: TokenMap,
-): Array<ResolvedTokenReference> {
+  tokens: TokenMap<Attributes, GroupAttributes>,
+): Array<ResolvedTokenReference<Attributes, GroupAttributes>> {
   const matches = Array.from(input.matchAll(TOKEN_REFERENCE_RE))
-  const references: Array<ResolvedTokenReference> = []
+  const references: Array<ResolvedTokenReference<Attributes, GroupAttributes>> =
+    []
 
   for (const match of matches) {
     const token = tokens.get(match[0])
@@ -20,11 +24,12 @@ function resolveStringReferences(
       throw new Error(`unknown reference \`${match[0]}\``)
     }
 
-    const tokenReference: ResolvedTokenReference = {
-      token,
-      start: match.index ?? 0,
-      end: (match.index ?? 0) + match[0].length,
-    }
+    const tokenReference: ResolvedTokenReference<Attributes, GroupAttributes> =
+      {
+        token,
+        start: match.index ?? 0,
+        end: (match.index ?? 0) + match[0].length,
+      }
 
     references.push(tokenReference)
   }
@@ -32,14 +37,20 @@ function resolveStringReferences(
   return references
 }
 
-function resolveValueReferences(
+function resolveValueReferences<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
   keys: Array<string>,
   value: JsValue,
-  tokens: TokenMap,
-): Array<[string, Array<ResolvedTokenReference>]> {
+  tokens: TokenMap<Attributes, GroupAttributes>,
+): Array<[string, Array<ResolvedTokenReference<Attributes, GroupAttributes>>]> {
   if (typeof value === 'string') {
     try {
-      const references = resolveStringReferences(value, tokens)
+      const references = resolveStringReferences<Attributes, GroupAttributes>(
+        value,
+        tokens,
+      )
 
       return references.length > 0 ? [[keys.join('.'), references]] : []
     } catch (e) {
@@ -52,10 +63,16 @@ function resolveValueReferences(
   }
 
   if (typeof value === 'object' && value !== null) {
-    const references: Array<[string, Array<ResolvedTokenReference>]> = []
+    const references: Array<
+      [string, Array<ResolvedTokenReference<Attributes, GroupAttributes>>]
+    > = []
 
     for (const [key, childValue] of Object.entries(value)) {
-      const child = resolveValueReferences([...keys, key], childValue, tokens)
+      const child = resolveValueReferences<Attributes, GroupAttributes>(
+        [...keys, key],
+        childValue,
+        tokens,
+      )
 
       references.push(...child)
     }
@@ -66,11 +83,22 @@ function resolveValueReferences(
   return []
 }
 
-export function resolveReferences(tokens: TokenMap): Set<ResolvedToken> {
-  const tokensWithReferences = new Set<ResolvedToken>()
+export function resolveReferences<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  tokens: TokenMap<Attributes, GroupAttributes>,
+): Set<ResolvedToken<Attributes, GroupAttributes>> {
+  const tokensWithReferences = new Set<
+    ResolvedToken<Attributes, GroupAttributes>
+  >()
   for (const token of tokens.values()) {
     try {
-      const references = resolveValueReferences(['$value'], token.value, tokens)
+      const references = resolveValueReferences<Attributes, GroupAttributes>(
+        ['$value'],
+        token.value,
+        tokens,
+      )
 
       if (references.length > 0) {
         tokensWithReferences.add(token)

@@ -1,8 +1,6 @@
 export type {
-  DesignTokenAttributes,
   DesignToken,
   DesignTokenGroup,
-  DesignTokenGroupAttributes,
   DesignTokens,
   DesignTokensInput,
   ExtractedTokenAttributes,
@@ -18,5 +16,8 @@ export type {
   TokenMap,
   ResolvedTokenReference,
   SerializedTokenReference,
+  ResolveValueArgs,
+  ResolveValueFn,
+  ResolveValueResult,
 } from './dictionary'
 export type { JsValue, Immutable } from './util'

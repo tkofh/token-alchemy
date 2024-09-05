@@ -21,7 +21,7 @@ describe('createDictionary', () => {
     const count = 5
     const numbers = Array.from({ length: count }, (_, i) => count - 1 - i)
     const input = numbers.reduce<DesignTokens>(
-      (acc, i) => ({ [`${i}-a`]: acc, [`${i}-b`]: acc }),
+      (acc, i) => ({ [`${i}-a`]: acc, [`${i}-b`]: acc }) as DesignTokens,
       {
         $value: 'hello',
       },
@@ -48,7 +48,9 @@ describe('createDictionary', () => {
   })
 
   test('it resolves direct child tokens', ({ expect }) => {
-    const tokens = createDictionary({ a: { $value: 'a', b: { $value: 'b' } } })
+    const tokens = createDictionary({
+      a: { $value: 'a', b: { $value: 'b' } },
+    })
     expect(tokens.get('{a}')).toBeDefined()
     expect(tokens.get('{a.b}')).toBeDefined()
   })

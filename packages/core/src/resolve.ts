@@ -1,4 +1,5 @@
 import type {
+  DesignTokenValue,
   DesignTokens,
   DesignTokensInput,
   ExtractedTokenAttributes,
@@ -16,32 +17,41 @@ import {
   objectEntries,
 } from './util'
 
-interface TokenResolutionOperation {
-  lineage: Array<ResolvedTokenPathSegment>
-  tokens: DesignTokens
+interface TokenResolutionOperation<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> {
+  lineage: Array<ResolvedTokenPathSegment<Attributes, GroupAttributes>>
+  tokens: DesignTokens<Attributes, GroupAttributes>
 }
 
-export function resolveTokens(input: DesignTokensInput): TokenMap {
-  const tokenMap = new Map<string, ResolvedToken>()
+export function resolveTokens<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  input: DesignTokensInput<Attributes, GroupAttributes>,
+): TokenMap<Attributes, GroupAttributes> {
+  const tokenMap = new Map<string, ResolvedToken<Attributes, GroupAttributes>>()
 
-  const queue: Array<TokenResolutionOperation> = objectEntries(input).map(
-    ([key, value]) => ({
+  const queue: Array<TokenResolutionOperation<Attributes, GroupAttributes>> =
+    objectEntries(input).map(([key, value]) => ({
       lineage: [
         {
           segmentKey: kebabCase(key),
-          attributes: extractGroupAttributes(value),
+          attributes: extractGroupAttributes<Attributes, GroupAttributes>(
+            value,
+          ),
         },
       ],
       tokens: value,
-    }),
-  )
+    }))
 
   while (queue.length > 0) {
     const element = queue.shift()
     if (element != null) {
       const { lineage, tokens } = element
 
-      if (isToken(tokens)) {
+      if (isToken<Attributes, GroupAttributes>(tokens)) {
         const keyParts = lineage.map(({ segmentKey }) => segmentKey)
         const reference = `{${keyParts.join('.')}}`
 
@@ -49,15 +59,18 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
           key: keyParts.join('-'),
           reference,
           attributes: lineage[lineage.length - 1]
-            .attributes as ExtractedTokenAttributes,
-          value: tokens.$value,
+            .attributes as ExtractedTokenAttributes<
+            Attributes,
+            GroupAttributes
+          >,
+          value: tokens.$value as DesignTokenValue<Attributes>,
           references: new Map(),
           dependencies: new Set(),
           path: lineage,
         })
       }
 
-      const children = extractGroupChildren(tokens)
+      const children = extractGroupChildren<Attributes, GroupAttributes>(tokens)
       if (children.length > 0) {
         for (const [segmentKey, childTokens] of children) {
           queue.push({
@@ -65,7 +78,9 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
               ...lineage,
               {
                 segmentKey: kebabCase(segmentKey),
-                attributes: extractGroupAttributes(childTokens),
+                attributes: extractGroupAttributes<Attributes, GroupAttributes>(
+                  childTokens,
+                ),
               },
             ],
             tokens: childTokens,
@@ -75,8 +90,13 @@ export function resolveTokens(input: DesignTokensInput): TokenMap {
     }
   }
 
-  const tokensWithReferences = resolveReferences(tokenMap)
-  resolveDependencies(tokenMap, tokensWithReferences)
+  const tokensWithReferences = resolveReferences<Attributes, GroupAttributes>(
+    tokenMap,
+  )
+  resolveDependencies<Attributes, GroupAttributes>(
+    tokenMap,
+    tokensWithReferences,
+  )
 
   return tokenMap
 }

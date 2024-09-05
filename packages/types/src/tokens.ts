@@ -6,43 +6,58 @@ import type {
   OneOrBoth,
 } from './util'
 
-// biome-ignore lint/complexity/noBannedTypes: This interface is extended in userland
-export type DesignTokenAttributes = {}
-
-// biome-ignore lint/complexity/noBannedTypes: This interface is extended in userland
-export type DesignTokenGroupAttributes = {}
-
 type TokenPrefix = Alphabet | Uppercase<Alphabet> | Numerals
 
 export type TokenKey = `${TokenPrefix}${string}`
 
-export type DesignToken = Omit<
-  DollarPrefix<DesignTokenAttributes>,
-  '$value'
+export type DesignToken<Attributes extends object = Record<string, unknown>> =
+  Omit<DollarPrefix<Attributes>, '$value'> & {
+    $value: NonNullable<
+      DollarPrefix<Attributes> extends { $value: infer Value }
+        ? Value
+        : string | number
+    >
+  }
+
+export type DesignTokenValue<
+  Attributes extends object = { $value: string | number },
+> = DesignToken<Attributes>['$value']
+
+export type DesignTokenGroup<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> = Omit<DollarPrefix<GroupAttributes>, keyof DesignToken<Attributes>>
+
+export type DesignTokens<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> = OneOrBoth<
+  DesignTokenGroup<Attributes, GroupAttributes>,
+  DesignToken<Attributes>
 > & {
-  $value: NonNullable<
-    DollarPrefix<DesignTokenAttributes> extends { $value: infer Value }
-      ? Value
-      : string | number
+  [K in TokenKey]: DesignTokens<Attributes, GroupAttributes>
+}
+
+export type DesignTokensInput<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> = Record<TokenKey, DesignTokens<Attributes, GroupAttributes>>
+
+export type ExtractedTokenAttributes<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> = Immutable<
+  OneOrBoth<
+    DesignToken<Attributes>,
+    DesignTokenGroup<Attributes, GroupAttributes>
   >
-}
-
-export type DesignTokenValue = DesignToken['$value']
-
-export type DesignTokenGroup = Omit<
-  DollarPrefix<DesignTokenGroupAttributes>,
-  keyof DesignToken
 >
-
-export type DesignTokens = OneOrBoth<DesignTokenGroup, DesignToken> & {
-  [K in TokenKey]: DesignTokens
-}
-
-export type DesignTokensInput = Record<TokenKey, DesignTokens>
-
-export type ExtractedTokenAttributes = Immutable<
-  OneOrBoth<DesignToken, DesignTokenGroup>
->
-export type ExtractedTokenGroupAttributes = Immutable<
-  OneOrBoth<DesignTokenGroup, DesignToken>
+export type ExtractedTokenGroupAttributes<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> = Immutable<
+  OneOrBoth<
+    DesignTokenGroup<Attributes, GroupAttributes>,
+    DesignToken<Attributes>
+  >
 >

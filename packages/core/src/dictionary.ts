@@ -1,28 +1,50 @@
 import type {
   DesignTokensInput,
+  Immutable,
+  ResolvedToken,
   TokenDictionary,
   TokenMap,
 } from '@token-alchemy/types'
 import { resolveTokens } from './resolve'
 import { deserializeTokenMap, serializeTokenMap } from './serialize'
 
-function createDictionaryImpl(tokens: TokenMap): TokenDictionary {
+function createDictionaryImpl<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  tokens: TokenMap<Attributes, GroupAttributes>,
+): TokenDictionary<Attributes, GroupAttributes> {
   return {
-    all: () => tokens.values(),
-    get: (key) => tokens.get(key),
+    all: () =>
+      tokens.values() as unknown as IterableIterator<
+        Immutable<ResolvedToken<Attributes, GroupAttributes>>
+      >,
+    get: (key) =>
+      tokens.get(key) as unknown as
+        | Immutable<ResolvedToken<Attributes, GroupAttributes>>
+        | undefined,
     has: (key) => tokens.has(key),
-    serialize: (pretty = false) => serializeTokenMap(tokens, pretty),
+    serialize: (pretty = false) =>
+      serializeTokenMap<Attributes, GroupAttributes>(tokens, pretty),
   }
 }
 
-export function createDictionary(input: DesignTokensInput): TokenDictionary {
-  const tokens = resolveTokens(input)
+export function createDictionary<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  input: DesignTokensInput<Attributes, GroupAttributes>,
+): TokenDictionary<Attributes, GroupAttributes> {
+  const tokens = resolveTokens<Attributes, GroupAttributes>(input)
 
-  return createDictionaryImpl(tokens)
+  return createDictionaryImpl<Attributes, GroupAttributes>(tokens)
 }
 
-export function deserializeDictionary(serialized: string): TokenDictionary {
-  const tokens = deserializeTokenMap(serialized)
+export function deserializeDictionary<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(serialized: string): TokenDictionary<Attributes, GroupAttributes> {
+  const tokens = deserializeTokenMap<Attributes, GroupAttributes>(serialized)
 
-  return createDictionaryImpl(tokens)
+  return createDictionaryImpl<Attributes, GroupAttributes>(tokens)
 }
