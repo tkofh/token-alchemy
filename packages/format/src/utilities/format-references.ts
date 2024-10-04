@@ -1,17 +1,22 @@
 import type {
   DesignTokenValue,
-  Immutable,
   ResolvedToken,
   ResolvedTokenReference,
 } from '@token-alchemy/types'
 import { cloneDeep, get, set } from 'lodash-es'
 
-type TokenFormatter = (token: Immutable<ResolvedToken>) => string
+type TokenFormatter<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+> = (token: ResolvedToken<Attributes, GroupAttributes>) => string
 
-function formatReferenceList(
+function formatReferenceList<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
   value: string,
-  references: Immutable<Array<ResolvedTokenReference>>,
-  format: TokenFormatter,
+  references: Array<ResolvedTokenReference<Attributes, GroupAttributes>>,
+  format: TokenFormatter<Attributes, GroupAttributes>,
 ): string {
   let output = value
   let offset = 0
@@ -25,11 +30,17 @@ function formatReferenceList(
   return output
 }
 
-export function formatReferences(
-  token: Immutable<ResolvedToken>,
-  format: TokenFormatter,
-): DesignTokenValue {
-  let value: DesignTokenValue = cloneDeep(token.attributes.$value)
+export function formatReferences<
+  Attributes extends object = { $value: string | number },
+  GroupAttributes extends object = Attributes,
+>(
+  token: ResolvedToken<Attributes, GroupAttributes>,
+  format: TokenFormatter<Attributes, GroupAttributes>,
+): DesignTokenValue<Attributes> {
+  let value: DesignTokenValue<Attributes> = cloneDeep(
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    (token.attributes as any).$value,
+  )
 
   for (const [key, references] of token.references) {
     if (key === '$value') {
