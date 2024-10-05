@@ -1,6 +1,6 @@
 import type { DesignTokens } from '@token-alchemy/types'
 import { describe, test } from 'vitest'
-import { createDictionary, deserializeDictionary } from '../src'
+import { createDictionary, deserializeDictionary } from '../src2'
 
 describe('createDictionary', () => {
   test('it resolves root-level tokens', ({ expect }) => {
