@@ -39,7 +39,7 @@ type MyToken = MyTokenBase | DimensionToken | ColorToken
 
 type MyContext = { mode: 'light' | 'dark' }
 
-const dictionary = new Dictionary<MyToken, MyContext>({
+const dictionary = new Dictionary<MyToken>({
   validator: (tokenData, parentData) => {
     if (parentData) {
       const parentIndex = orderedTiers.indexOf(parentData.$tier)
@@ -61,7 +61,7 @@ const dictionary = new Dictionary<MyToken, MyContext>({
 
 dictionary.insert({
   color: {
-    $tier: 'mode',
+    $tier: 'system',
     gray: {
       $tier: 'kind',
       1: {
@@ -336,13 +336,11 @@ console.log(
   Array.from(
     dictionary.filter((token) => token.data().$type === 'color'),
     (token) =>
-      token.format({ mode: 'dark' }, ({ token, context, replace }) => {
+      token.format(({ token, replace }) => {
         const data = token.data()
 
         const value = String(
-          typeof data.$value === 'object'
-            ? data.$value[context.mode]
-            : data.$value,
+          typeof data.$value === 'object' ? data.$value.light : data.$value,
         )
 
         return replace(value, (token) => `var(--${token.key()})`)

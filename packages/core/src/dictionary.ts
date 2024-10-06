@@ -21,49 +21,42 @@ type TokenInput<T extends DollarPrefix<T>> = WithTokenChildren<
 
 type TokensInput<T extends DollarPrefix<T>> = Record<TokenKey, TokenInput<T>>
 
-type TokenReplaceHandler<T extends DollarPrefix<T>, C> = (
-  token: Token<T, C>,
+type TokenReplaceHandler<T extends DollarPrefix<T>> = (
+  token: Token<T>,
 ) => string
 
-type TokenReplaceInterceptor<T extends DollarPrefix<T>, C> = (
-  replacer: TokenReplaceHandler<T, C>,
-  token: Token<T, C>,
+type TokenReplaceInterceptor<T extends DollarPrefix<T>> = (
+  replacer: TokenReplaceHandler<T>,
+  token: Token<T>,
 ) => string
 
-type TokenReplacer<T extends DollarPrefix<T>, C> = (
+type TokenReplacer<T extends DollarPrefix<T>> = (
   formatted: string,
-  replace: TokenReplaceHandler<T, C>,
+  replace: TokenReplaceHandler<T>,
 ) => string
 
 export const REFERENCE_PATTERN =
   /({[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)*})/g
 
-export type FormattingContext<T extends DollarPrefix<T>, C> = {
-  readonly token: Token<T, C>
-  readonly context: C
-  readonly resolve: TokenResolver<T, C>
-  readonly replace: TokenReplacer<T, C>
+export type FormattingContext<T extends DollarPrefix<T>> = {
+  readonly token: Token<T>
+  readonly resolve: TokenResolver<T>
+  readonly replace: TokenReplacer<T>
 }
 
-export type Formatter<T extends DollarPrefix<T>, C> = (
-  api: FormattingContext<T, C>,
+export type Formatter<T extends DollarPrefix<T>> = (
+  api: FormattingContext<T>,
 ) => string
 
-type TokenResolver<T extends DollarPrefix<T>, C> = (
-  reference: string,
-) => Token<T, C>
+type TokenResolver<T extends DollarPrefix<T>> = (reference: string) => Token<T>
 
-type ReferenceCountingContext<T extends DollarPrefix<T>, C> = FormattingContext<
-  T,
-  C
-> & {
-  readonly depth: number
-  readonly maxDepth: number
-}
+type ReferenceCountingContext<T extends DollarPrefix<T>> =
+  FormattingContext<T> & {
+    readonly depth: number
+    readonly maxDepth: number
+  }
 
-type TokenPredicate<T extends DollarPrefix<T>, C> = (
-  token: Token<T, C>,
-) => boolean
+type TokenPredicate<T extends DollarPrefix<T>> = (token: Token<T>) => boolean
 
 export type TokenValidator<T extends DollarPrefix<T>> = (
   tokenData: T,
@@ -74,10 +67,10 @@ export type DictionaryOptions<T extends DollarPrefix<T>> = {
   validator: TokenValidator<T>
 }
 
-export class Dictionary<T extends DollarPrefix<T>, C = never> {
+export class Dictionary<T extends DollarPrefix<T> = never> {
   readonly #keys = new Map<string, string>()
-  readonly #tokens = new Map<string, Token<T, C>>()
-  readonly #root = new TokenNode<T, C>(this)
+  readonly #tokens = new Map<string, Token<T>>()
+  readonly #root = new TokenNode<T>(this)
   readonly #options: DictionaryOptions<T>
 
   #isFormatting = false
@@ -89,9 +82,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
   }
 
   insert(tokens: TokensInput<T>) {
-    const queue: Array<[TokenNode<T, C>, TokensInput<T>]> = [
-      [this.#root, tokens],
-    ]
+    const queue: Array<[TokenNode<T>, TokensInput<T>]> = [[this.#root, tokens]]
 
     while (queue.length) {
       // biome-ignore lint/style/noNonNullAssertion: will always be defined due to loop predicate
@@ -117,7 +108,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
    * Try to resolve a token by its alias. Returns `undefined` if the token is not found.
    * @param alias The alias of the token to resolve.
    */
-  tryResolve(alias: string): Token<T, C> | undefined {
+  tryResolve(alias: string): Token<T> | undefined {
     return this.#tokens.get(alias)
   }
 
@@ -125,7 +116,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
    * Resolve a token by its alias. Throws an error if the token is not found.
    * @param alias The alias of the token to resolve.
    */
-  resolve(alias: string): Token<T, C> {
+  resolve(alias: string): Token<T> {
     const token = this.tryResolve(alias)
 
     if (!token) {
@@ -135,9 +126,9 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     return token
   }
 
-  format(reference: string, context: C, formatter: Formatter<T, C>): string
-  format(token: Token<T, C>, context: C, formatter: Formatter<T, C>): string
-  format(input: Token<T, C> | string, context: C, formatter: Formatter<T, C>) {
+  format(reference: string, formatter: Formatter<T>): string
+  format(token: Token<T>, formatter: Formatter<T>): string
+  format(input: Token<T> | string, formatter: Formatter<T>) {
     if (this.#isFormatting) {
       throw new Error('Cannot format while formatting')
     }
@@ -150,7 +141,6 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     const result = this.#format(
       {
         token,
-        context,
         resolve,
         replace,
       },
@@ -164,22 +154,19 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
 
   references(
     reference: string,
-    context: C,
-    formatter: Formatter<T, C>,
+    formatter: Formatter<T>,
     depth?: number,
-  ): ReadonlySet<Token<T, C>>
+  ): ReadonlySet<Token<T>>
   references(
-    token: Token<T, C>,
-    context: C,
-    formatter: Formatter<T, C>,
+    token: Token<T>,
+    formatter: Formatter<T>,
     depth?: number,
-  ): ReadonlySet<Token<T, C>>
+  ): ReadonlySet<Token<T>>
   references(
-    input: Token<T, C> | string,
-    context: C,
-    formatter: Formatter<T, C>,
+    input: Token<T> | string,
+    formatter: Formatter<T>,
     depth = 0,
-  ): ReadonlySet<Token<T, C>> {
+  ): ReadonlySet<Token<T>> {
     if (this.#isFormatting) {
       throw new Error('Cannot format while formatting')
     }
@@ -187,7 +174,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
 
     const token = typeof input === 'string' ? this.resolve(input) : input
 
-    const references = new Set<Token<T, C>>()
+    const references = new Set<Token<T>>()
 
     const resolve = this.#createResolver(references)
     const replace = this.#createReplacer(resolve)
@@ -197,7 +184,6 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
         token,
         depth: 0,
         maxDepth: depth <= 0 ? Number.POSITIVE_INFINITY : depth,
-        context,
         resolve,
         replace,
       },
@@ -209,7 +195,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     return references
   }
 
-  filter(predicate: TokenPredicate<T, C>): IterableIterator<Token<T, C>> {
+  filter(predicate: TokenPredicate<T>): IterableIterator<Token<T>> {
     const tokens = this.#tokens
     return (function* () {
       for (const token of tokens.values()) {
@@ -220,7 +206,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     })()
   }
 
-  #insertNode(parent: TokenNode<T, C>, key: string, value: T) {
+  #insertNode(parent: TokenNode<T>, key: string, value: T) {
     const node = parent.child(
       key,
       Object.fromEntries(
@@ -240,7 +226,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     return node
   }
 
-  #insertToken(node: TokenNode<T, C>) {
+  #insertToken(node: TokenNode<T>) {
     const token = new Token(node)
 
     const tokenKey = token.key()
@@ -249,7 +235,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     if (this.#keys.has(tokenKey)) {
       const other = this.#tokens.get(
         this.#keys.get(tokenKey) as string,
-      ) as Token<T, C>
+      ) as Token<T>
       throw new Error(
         `Duplicate token key: ${tokenKey} (${other.path()} and ${token.path()})`,
       )
@@ -259,7 +245,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     this.#tokens.set(tokenReference, token)
   }
 
-  #createResolver(visited?: Set<Token<T, C>>) {
+  #createResolver(visited?: Set<Token<T>>) {
     return (reference: string) => {
       const token = this.resolve(reference)
 
@@ -277,10 +263,10 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
   }
 
   #createReplacer(
-    resolver: TokenResolver<T, C>,
-    interceptor?: TokenReplaceInterceptor<T, C>,
-  ): TokenReplacer<T, C> {
-    return (formatted: string, replace: TokenReplaceHandler<T, C>) => {
+    resolver: TokenResolver<T>,
+    interceptor?: TokenReplaceInterceptor<T>,
+  ): TokenReplacer<T> {
+    return (formatted: string, replace: TokenReplaceHandler<T>) => {
       if (interceptor) {
         return this.#replace(resolver, formatted, (token) =>
           interceptor(replace, token),
@@ -291,9 +277,9 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
   }
 
   #replace(
-    resolver: TokenResolver<T, C>,
+    resolver: TokenResolver<T>,
     formatted: string,
-    replace: TokenReplaceHandler<T, C>,
+    replace: TokenReplaceHandler<T>,
   ): string {
     return formatted.replace(REFERENCE_PATTERN, (reference) => {
       const token = resolver(reference)
@@ -302,7 +288,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     })
   }
 
-  #format(api: FormattingContext<T, C>, formatter: Formatter<T, C>): string {
+  #format(api: FormattingContext<T>, formatter: Formatter<T>): string {
     const result = formatter(api)
 
     return result.replace(REFERENCE_PATTERN, (reference) => {
@@ -313,8 +299,8 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
   }
 
   #countReferences(
-    context: ReferenceCountingContext<T, C>,
-    formatter: Formatter<T, C>,
+    context: ReferenceCountingContext<T>,
+    formatter: Formatter<T>,
   ) {
     if (context.depth >= context.maxDepth) {
       return
