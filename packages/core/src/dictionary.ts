@@ -35,7 +35,9 @@ type TokenReplacer<T extends DollarPrefix<T>> = (
   replace: TokenReplaceHandler<T>,
 ) => string
 
-export const REFERENCE_PATTERN =
+const KEY_PART_PATTERN = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/
+
+const REFERENCE_PATTERN =
   /({[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)*})/g
 
 export type FormattingContext<T extends DollarPrefix<T>> = {
@@ -207,6 +209,10 @@ export class Dictionary<T extends DollarPrefix<T> = never> {
   }
 
   #insertNode(parent: TokenNode<T>, key: string, value: T) {
+    if (key.match(KEY_PART_PATTERN) === null) {
+      throw new Error(`Invalid key: ${key}`)
+    }
+
     const node = parent.child(
       key,
       Object.fromEntries(

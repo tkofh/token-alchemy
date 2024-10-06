@@ -14,32 +14,23 @@ const orderedTiers = [
   'mode',
 ] as const
 
-type MyTokenBase = {
+interface BaseToken {
   $tier: (typeof orderedTiers)[number]
 }
 
 type Modal<T> = T | { light: T; dark: T }
 
-type DimensionToken = Omit<
-  MyTokenBase & {
-    $type: 'dimension'
-    $value: Modal<string | number>
-  },
-  never
->
-type ColorToken = Omit<
-  MyTokenBase & {
-    $type: 'color'
-    $value: Modal<string>
-  },
-  never
->
+interface DimensionToken extends BaseToken {
+  $type: 'dimension'
+  $value: Modal<string | number>
+}
 
-type MyToken = MyTokenBase | DimensionToken | ColorToken
+interface ColorToken extends BaseToken {
+  $type: 'color'
+  $value: Modal<string>
+}
 
-type MyContext = { mode: 'light' | 'dark' }
-
-const dictionary = new Dictionary<MyToken>({
+const dictionary = new Dictionary<BaseToken | DimensionToken | ColorToken>({
   validator: (tokenData, parentData) => {
     if (parentData) {
       const parentIndex = orderedTiers.indexOf(parentData.$tier)
@@ -255,7 +246,6 @@ dictionary.insert({
         },
       },
     },
-
     overlay: {
       $tier: 'kind',
       $type: 'color',
