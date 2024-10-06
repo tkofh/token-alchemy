@@ -1,4 +1,4 @@
-import { Dictionary } from './dictionary'
+import { createDictionary } from './dictionary'
 
 const orderedTiers = [
   'system',
@@ -30,7 +30,7 @@ interface ColorToken extends BaseToken {
   $value: Modal<string>
 }
 
-const dictionary = new Dictionary<BaseToken | DimensionToken | ColorToken>({
+const dictionary = createDictionary<BaseToken | DimensionToken | ColorToken>({
   validator: (tokenData, parentData) => {
     if (parentData) {
       const parentIndex = orderedTiers.indexOf(parentData.$tier)

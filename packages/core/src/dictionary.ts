@@ -69,7 +69,7 @@ export type DictionaryOptions<T extends DollarPrefix<T>> = {
   validator: TokenValidator<T>
 }
 
-export class Dictionary<T extends DollarPrefix<T> = never> {
+class Dictionary<T extends DollarPrefix<T> = never> {
   readonly #keys = new Map<string, string>()
   readonly #tokens = new Map<string, Token<T>>()
   readonly #root = new Node<T>(this)
@@ -309,4 +309,12 @@ export class Dictionary<T extends DollarPrefix<T> = never> {
       return reference
     })
   }
+}
+
+export type { Dictionary }
+
+export function createDictionary<T extends DollarPrefix<T> = never>(
+  options: Partial<DictionaryOptions<T>> = {},
+) {
+  return new Dictionary(options)
 }
