@@ -47,4 +47,8 @@ export class Node<T extends DollarPrefix<T>> {
 
     return child
   }
+
+  // extract():  {
+  //
+  // }
 }

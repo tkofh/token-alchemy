@@ -1,6 +1,5 @@
-import type { Formatter } from './dictionary'
 import type { Node } from './node'
-import type { DollarPrefix } from './types'
+import type { DollarPrefix, Formatter } from './types'
 
 type TokenValueData<T extends DollarPrefix<T>> = T extends { $value: unknown }
   ? T

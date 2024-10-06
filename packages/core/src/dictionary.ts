@@ -1,66 +1,24 @@
 import { Node } from './node'
 import { Token } from './token'
-import type { DollarPrefix, TokenKey } from './types'
-
-type Keys<T> = T extends unknown ? keyof T : never
-type ShallowMergeRecordLeft<T, U> = T & {
-  [K in Exclude<Keys<U>, keyof T>]?: never
-}
-type DistributeMerges<A, B> = A extends unknown
-  ? ShallowMergeRecordLeft<A, B>
-  : never
-type MutuallyExclusive<T> = DistributeMerges<T, T>
-
-type WithTokenChildren<T extends DollarPrefix<T>> = T & {
-  [Key in TokenKey]: TokenInput<T>
-}
-
-type TokenInput<T extends DollarPrefix<T>> = WithTokenChildren<
-  MutuallyExclusive<T>
->
-
-type TokensInput<T extends DollarPrefix<T>> = Record<TokenKey, TokenInput<T>>
-
-type TokenReplaceHandler<T extends DollarPrefix<T>> = (
-  token: Token<T>,
-) => string
-
-type TokenReplaceInterceptor<T extends DollarPrefix<T>> = (
-  replacer: TokenReplaceHandler<T>,
-  token: Token<T>,
-) => string
-
-type TokenReplacer<T extends DollarPrefix<T>> = (
-  formatted: string,
-  replace: TokenReplaceHandler<T>,
-) => string
+import type {
+  DollarPrefix,
+  Formatter,
+  FormattingContext,
+  ReferenceCountingContext,
+  ReplaceHandler,
+  ReplaceInterceptor,
+  TokenPredicate,
+  TokenReplacer,
+  TokenResolver,
+  TokensInput,
+} from './types'
 
 const KEY_PART_PATTERN = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/
 
 const REFERENCE_PATTERN =
   /({[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)*})/g
 
-export type FormattingContext<T extends DollarPrefix<T>> = {
-  readonly token: Token<T>
-  readonly resolve: TokenResolver<T>
-  readonly replace: TokenReplacer<T>
-}
-
-export type Formatter<T extends DollarPrefix<T>> = (
-  api: FormattingContext<T>,
-) => string
-
-type TokenResolver<T extends DollarPrefix<T>> = (reference: string) => Token<T>
-
-type ReferenceCountingContext<T extends DollarPrefix<T>> =
-  FormattingContext<T> & {
-    readonly depth: number
-    readonly maxDepth: number
-  }
-
-type TokenPredicate<T extends DollarPrefix<T>> = (token: Token<T>) => boolean
-
-export type TokenValidator<T extends DollarPrefix<T>> = (
+type TokenValidator<T extends DollarPrefix<T>> = (
   tokenData: T,
   parentData: T | null,
 ) => { valid: true } | { valid: false; reason: string }
@@ -270,9 +228,9 @@ class Dictionary<T extends DollarPrefix<T> = never> {
 
   #createReplacer(
     resolver: TokenResolver<T>,
-    interceptor?: TokenReplaceInterceptor<T>,
+    interceptor?: ReplaceInterceptor<T>,
   ): TokenReplacer<T> {
-    return (formatted: string, replace: TokenReplaceHandler<T>) => {
+    return (formatted: string, replace: ReplaceHandler<T>) => {
       return formatted.replace(REFERENCE_PATTERN, (reference) => {
         const token = resolver(reference)
 
@@ -281,13 +239,13 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     }
   }
 
-  #format(api: FormattingContext<T>, formatter: Formatter<T>): string {
-    const result = formatter(api)
+  #format(context: FormattingContext<T>, formatter: Formatter<T>): string {
+    const result = formatter(context)
 
     return result.replace(REFERENCE_PATTERN, (reference) => {
-      const token = api.resolve(reference)
+      const token = context.resolve(reference)
 
-      return this.#format({ ...api, token }, formatter)
+      return this.#format({ ...context, token }, formatter)
     })
   }
 
