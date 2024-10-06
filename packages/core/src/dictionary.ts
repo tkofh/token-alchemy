@@ -278,6 +278,13 @@ export type { Dictionary }
 
 export function createDictionary<T extends DollarPrefix<T> = never>(
   options: Partial<DictionaryOptions<T>> = {},
+  input?: TokensInput<T>,
 ) {
-  return new Dictionary(options)
+  const dictionary = new Dictionary(options)
+
+  if (input) {
+    dictionary.insert(input)
+  }
+
+  return dictionary
 }
