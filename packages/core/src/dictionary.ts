@@ -102,21 +102,7 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
           continue
         }
 
-        const node = parent.child(
-          key,
-          Object.fromEntries(
-            Object.entries(value).filter(([key]) => key.startsWith('$')),
-          ) as DollarPrefix<T>,
-        )
-
-        if (this.#options.validator) {
-          const result = this.#options.validator(node.token as T, parent.token)
-          if (!result.valid) {
-            throw new Error(
-              `Invalid token data: ${node.keyParts().join('/')} (${result.reason})`,
-            )
-          }
-        }
+        const node = this.#insertNode(parent, key, value)
 
         queue.push([node, value])
 
@@ -232,6 +218,26 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
         }
       }
     })()
+  }
+
+  #insertNode(parent: TokenNode<T, C>, key: string, value: T) {
+    const node = parent.child(
+      key,
+      Object.fromEntries(
+        Object.entries(value).filter(([key]) => key.startsWith('$')),
+      ) as DollarPrefix<T>,
+    )
+
+    if (this.#options.validator) {
+      const result = this.#options.validator(node.token as T, parent.token)
+      if (!result.valid) {
+        throw new Error(
+          `Invalid token data: ${node.keyParts().join('/')} (${result.reason})`,
+        )
+      }
+    }
+
+    return node
   }
 
   #insertToken(node: TokenNode<T, C>) {
