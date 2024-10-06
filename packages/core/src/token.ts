@@ -1,3 +1,4 @@
+import type { Formatter } from './dictionary'
 import type { TokenNode } from './node'
 import type { DollarPrefix } from './types'
 
@@ -28,12 +29,16 @@ export class Token<T extends DollarPrefix<T>, C = never> {
     return this.#node.keyParts().join('/')
   }
 
-  format(context: C): string {
-    return this.#node.dictionary.format(this.reference(), context)
+  format(context: C, formatter: Formatter<T, C>): string {
+    return this.#node.dictionary.format(this.reference(), context, formatter)
   }
 
-  references(context: C, depth = 0): ReadonlySet<Token<T, C>> {
-    return this.#node.dictionary.references(this, context, depth)
+  references(
+    context: C,
+    formatter: Formatter<T, C>,
+    depth = 0,
+  ): ReadonlySet<Token<T, C>> {
+    return this.#node.dictionary.references(this, context, formatter, depth)
   }
 
   [Symbol.for('nodejs.util.inspect.custom')]() {

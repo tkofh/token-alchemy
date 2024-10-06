@@ -36,17 +36,7 @@ type MyToken = MyTokenBase | DimensionToken | ColorToken
 
 type MyContext = { mode: 'light' | 'dark' }
 
-const dictionary = new Dictionary<MyToken, MyContext>({
-  formatter: ({ token, context, replace }) => {
-    const data = token.data()
-
-    const value = String(
-      typeof data.$value === 'object' ? data.$value[context.mode] : data.$value,
-    )
-
-    return replace(value, (token) => `var(--${token.key()})`)
-  },
-})
+const dictionary = new Dictionary<MyToken, MyContext>()
 
 dictionary.insert({
   color: {
@@ -321,11 +311,20 @@ dictionary.insert({
   },
 })
 
-console.log(dictionary.references('{color.overlay}', { mode: 'light' }))
-
 console.log(
   Array.from(
     dictionary.filter((token) => token.data().$type === 'color'),
-    (token) => token.key(),
+    (token) =>
+      token.format({ mode: 'dark' }, ({ token, context, replace }) => {
+        const data = token.data()
+
+        const value = String(
+          typeof data.$value === 'object'
+            ? data.$value[context.mode]
+            : data.$value,
+        )
+
+        return replace(value, (token) => `var(--${token.key()})`)
+      }),
   ),
 )

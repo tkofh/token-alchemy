@@ -38,14 +38,14 @@ type TokenReplacer<T extends DollarPrefix<T>, C> = (
 const REFERENCE_PATTERN =
   /({[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)*})/g
 
-type FormattingContext<T extends DollarPrefix<T>, C> = {
+export type FormattingContext<T extends DollarPrefix<T>, C> = {
   readonly token: Token<T, C>
   readonly context: C
   readonly resolve: TokenResolver<T, C>
   readonly replace: TokenReplacer<T, C>
 }
 
-type Formatter<T extends DollarPrefix<T>, C> = (
+export type Formatter<T extends DollarPrefix<T>, C> = (
   api: FormattingContext<T, C>,
 ) => string
 
@@ -65,28 +65,28 @@ type TokenPredicate<T extends DollarPrefix<T>, C> = (
   token: Token<T, C>,
 ) => boolean
 
-export type DictionaryOptions<T extends DollarPrefix<T>, C> = {
-  formatter: Formatter<T, C>
-}
+// export type DictionaryOptions<T extends DollarPrefix<T>, C> = {
+//   formatter: Formatter<T, C>
+// }
 
 export class Dictionary<T extends DollarPrefix<T>, C = never> {
   readonly #keys = new Map<string, string>()
   readonly #tokens = new Map<string, Token<T, C>>()
   readonly #root = new TokenNode<T, C>(this)
-  readonly #options: DictionaryOptions<T, C>
+  // readonly #options: DictionaryOptions<T, C>
 
   #isFormatting = false
 
-  constructor(options: Partial<DictionaryOptions<T, C>> = {}) {
-    this.#options = {
-      formatter:
-        options.formatter ??
-        (((token: Token<T, C>) => token.reference()) as unknown as Formatter<
-          T,
-          C
-        >),
-    }
-  }
+  // constructor(options: Partial<DictionaryOptions<T, C>> = {}) {
+  //   this.#options = {
+  //     formatter:
+  //       options.formatter ??
+  //       (((token: Token<T, C>) => token.reference()) as unknown as Formatter<
+  //         T,
+  //         C
+  //       >),
+  //   }
+  // }
 
   insert(tokens: TokensInput<T>) {
     const queue: Array<[TokenNode<T, C>, TokensInput<T>]> = [
@@ -140,9 +140,9 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     return token
   }
 
-  format(reference: string, context: C): string
-  format(token: Token<T, C>, context: C): string
-  format(input: Token<T, C> | string, context: C) {
+  format(reference: string, context: C, formatter: Formatter<T, C>): string
+  format(token: Token<T, C>, context: C, formatter: Formatter<T, C>): string
+  format(input: Token<T, C> | string, context: C, formatter: Formatter<T, C>) {
     if (this.#isFormatting) {
       throw new Error('Cannot format while formatting')
     }
@@ -152,12 +152,15 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     const resolve = this.#createResolver(new Set([token]))
     const replace = this.#createReplacer(resolve)
 
-    const result = this.#format({
-      token,
-      context,
-      resolve,
-      replace,
-    })
+    const result = this.#format(
+      {
+        token,
+        context,
+        resolve,
+        replace,
+      },
+      formatter,
+    )
 
     this.#isFormatting = false
 
@@ -167,16 +170,19 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
   references(
     reference: string,
     context: C,
+    formatter: Formatter<T, C>,
     depth?: number,
   ): ReadonlySet<Token<T, C>>
   references(
     token: Token<T, C>,
     context: C,
+    formatter: Formatter<T, C>,
     depth?: number,
   ): ReadonlySet<Token<T, C>>
   references(
     input: Token<T, C> | string,
     context: C,
+    formatter: Formatter<T, C>,
     depth = 0,
   ): ReadonlySet<Token<T, C>> {
     if (this.#isFormatting) {
@@ -191,14 +197,17 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     const resolve = this.#createResolver(references)
     const replace = this.#createReplacer(resolve)
 
-    this.#countReferences({
-      token,
-      depth: 0,
-      maxDepth: depth <= 0 ? Number.POSITIVE_INFINITY : depth,
-      context,
-      resolve,
-      replace,
-    })
+    this.#countReferences(
+      {
+        token,
+        depth: 0,
+        maxDepth: depth <= 0 ? Number.POSITIVE_INFINITY : depth,
+        context,
+        resolve,
+        replace,
+      },
+      formatter,
+    )
 
     this.#isFormatting = false
 
@@ -278,27 +287,30 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     })
   }
 
-  #format(api: FormattingContext<T, C>): string {
-    const result = this.#options.formatter(api)
+  #format(api: FormattingContext<T, C>, formatter: Formatter<T, C>): string {
+    const result = formatter(api)
 
     return result.replace(REFERENCE_PATTERN, (reference) => {
       const token = api.resolve(reference)
 
-      return this.#format({ ...api, token })
+      return this.#format({ ...api, token }, formatter)
     })
   }
 
-  #countReferences(context: ReferenceCountingContext<T, C>) {
+  #countReferences(
+    context: ReferenceCountingContext<T, C>,
+    formatter: Formatter<T, C>,
+  ) {
     if (context.depth >= context.maxDepth) {
       return
     }
 
-    const result = this.#options.formatter(context)
+    const result = formatter(context)
 
     result.replace(REFERENCE_PATTERN, (reference) => {
       context.resolve(reference)
 
-      this.#countReferences({ ...context, depth: context.depth + 1 })
+      this.#countReferences({ ...context, depth: context.depth + 1 }, formatter)
 
       return reference
     })
