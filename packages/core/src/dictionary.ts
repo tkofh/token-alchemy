@@ -35,7 +35,7 @@ type TokenReplacer<T extends DollarPrefix<T>, C> = (
   replace: TokenReplaceHandler<T, C>,
 ) => string
 
-const REFERENCE_PATTERN =
+export const REFERENCE_PATTERN =
   /({[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)*})/g
 
 export type FormattingContext<T extends DollarPrefix<T>, C> = {
@@ -65,28 +65,28 @@ type TokenPredicate<T extends DollarPrefix<T>, C> = (
   token: Token<T, C>,
 ) => boolean
 
-// export type DictionaryOptions<T extends DollarPrefix<T>, C> = {
-//   formatter: Formatter<T, C>
-// }
+export type TokenValidator<T extends DollarPrefix<T>> = (
+  tokenData: T,
+  parentData: T | null,
+) => { valid: true } | { valid: false; reason: string }
+
+export type DictionaryOptions<T extends DollarPrefix<T>> = {
+  validator: TokenValidator<T>
+}
 
 export class Dictionary<T extends DollarPrefix<T>, C = never> {
   readonly #keys = new Map<string, string>()
   readonly #tokens = new Map<string, Token<T, C>>()
   readonly #root = new TokenNode<T, C>(this)
-  // readonly #options: DictionaryOptions<T, C>
+  readonly #options: DictionaryOptions<T>
 
   #isFormatting = false
 
-  // constructor(options: Partial<DictionaryOptions<T, C>> = {}) {
-  //   this.#options = {
-  //     formatter:
-  //       options.formatter ??
-  //       (((token: Token<T, C>) => token.reference()) as unknown as Formatter<
-  //         T,
-  //         C
-  //       >),
-  //   }
-  // }
+  constructor(options: Partial<DictionaryOptions<T>> = {}) {
+    this.#options = {
+      validator: options.validator ?? (() => ({ valid: true })),
+    }
+  }
 
   insert(tokens: TokensInput<T>) {
     const queue: Array<[TokenNode<T, C>, TokensInput<T>]> = [
@@ -108,6 +108,15 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
             Object.entries(value).filter(([key]) => key.startsWith('$')),
           ) as DollarPrefix<T>,
         )
+
+        if (this.#options.validator) {
+          const result = this.#options.validator(node.token as T, parent.token)
+          if (!result.valid) {
+            throw new Error(
+              `Invalid token data: ${node.keyParts().join('/')} (${result.reason})`,
+            )
+          }
+        }
 
         queue.push([node, value])
 

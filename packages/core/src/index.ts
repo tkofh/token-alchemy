@@ -1,18 +1,21 @@
 import { Dictionary } from './dictionary'
 
+const orderedTiers = [
+  'system',
+  'theme',
+  'group',
+  'entity',
+  'kind',
+  'scope',
+  'variant',
+  'modifier',
+  'state',
+  'scale',
+  'mode',
+] as const
+
 type MyTokenBase = {
-  $tier:
-    | 'system'
-    | 'theme'
-    | 'group'
-    | 'entity'
-    | 'kind'
-    | 'scope'
-    | 'variant'
-    | 'modifier'
-    | 'state'
-    | 'scale'
-    | 'mode'
+  $tier: (typeof orderedTiers)[number]
 }
 
 type Modal<T> = T | { light: T; dark: T }
@@ -36,11 +39,29 @@ type MyToken = MyTokenBase | DimensionToken | ColorToken
 
 type MyContext = { mode: 'light' | 'dark' }
 
-const dictionary = new Dictionary<MyToken, MyContext>()
+const dictionary = new Dictionary<MyToken, MyContext>({
+  validator: (tokenData, parentData) => {
+    if (parentData) {
+      const parentIndex = orderedTiers.indexOf(parentData.$tier)
+      const tokenIndex = orderedTiers.indexOf(tokenData.$tier)
+
+      if (parentIndex > tokenIndex) {
+        return {
+          valid: false,
+          reason: `Token tier ${tokenData.$tier} is higher than parent tier ${parentData.$tier}`,
+        }
+      }
+    }
+
+    return {
+      valid: true,
+    }
+  },
+})
 
 dictionary.insert({
   color: {
-    $tier: 'system',
+    $tier: 'mode',
     gray: {
       $tier: 'kind',
       1: {
