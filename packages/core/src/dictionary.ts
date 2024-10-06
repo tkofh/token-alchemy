@@ -1,4 +1,4 @@
-import { TokenNode } from './node'
+import { Node } from './node'
 import { Token } from './token'
 import type { DollarPrefix, TokenKey } from './types'
 
@@ -72,7 +72,7 @@ export type DictionaryOptions<T extends DollarPrefix<T>> = {
 export class Dictionary<T extends DollarPrefix<T> = never> {
   readonly #keys = new Map<string, string>()
   readonly #tokens = new Map<string, Token<T>>()
-  readonly #root = new TokenNode<T>(this)
+  readonly #root = new Node<T>(this)
   readonly #options: DictionaryOptions<T>
 
   #isFormatting = false
@@ -84,7 +84,7 @@ export class Dictionary<T extends DollarPrefix<T> = never> {
   }
 
   insert(tokens: TokensInput<T>) {
-    const queue: Array<[TokenNode<T>, TokensInput<T>]> = [[this.#root, tokens]]
+    const queue: Array<[Node<T>, TokensInput<T>]> = [[this.#root, tokens]]
 
     while (queue.length) {
       // biome-ignore lint/style/noNonNullAssertion: will always be defined due to loop predicate
@@ -208,7 +208,7 @@ export class Dictionary<T extends DollarPrefix<T> = never> {
     })()
   }
 
-  #insertNode(parent: TokenNode<T>, key: string, value: T) {
+  #insertNode(parent: Node<T>, key: string, value: T) {
     if (key.match(KEY_PART_PATTERN) === null) {
       throw new Error(`Invalid key: ${key}`)
     }
@@ -232,7 +232,7 @@ export class Dictionary<T extends DollarPrefix<T> = never> {
     return node
   }
 
-  #insertToken(node: TokenNode<T>) {
+  #insertToken(node: Node<T>) {
     const token = new Token(node)
 
     const tokenKey = token.key()

@@ -1,5 +1,5 @@
 import type { Formatter } from './dictionary'
-import type { TokenNode } from './node'
+import type { Node } from './node'
 import type { DollarPrefix } from './types'
 
 type TokenValueData<T extends DollarPrefix<T>> = T extends { $value: unknown }
@@ -7,9 +7,9 @@ type TokenValueData<T extends DollarPrefix<T>> = T extends { $value: unknown }
   : never
 
 export class Token<T extends DollarPrefix<T>> {
-  readonly #node: TokenNode<T>
+  readonly #node: Node<T>
 
-  constructor(node: TokenNode<T>) {
+  constructor(node: Node<T>) {
     this.#node = node
   }
 

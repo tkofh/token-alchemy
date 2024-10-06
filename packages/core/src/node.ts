@@ -1,19 +1,19 @@
 import type { Dictionary } from './dictionary'
 import type { DollarPrefix } from './types'
 
-type TokenParent<T extends DollarPrefix<T>> = TokenNode<T> | null
+type TokenParent<T extends DollarPrefix<T>> = Node<T> | null
 
-export class TokenNode<T extends DollarPrefix<T>> {
+export class Node<T extends DollarPrefix<T>> {
   readonly dictionary: Dictionary<T>
   readonly token: T | null
   readonly #parent: TokenParent<T>
   readonly #keyPart: string | null
 
-  readonly #children = new Map<string, TokenNode<T>>()
+  readonly #children = new Map<string, Node<T>>()
 
   constructor(
     dictionary: Dictionary<T>,
-    parent: TokenNode<T> | null = null,
+    parent: Node<T> | null = null,
     keyPart: string | null = null,
     token: T | null = null,
   ) {
@@ -39,10 +39,10 @@ export class TokenNode<T extends DollarPrefix<T>> {
     return this.#parent.keyParts().concat(this.#keyPart)
   }
 
-  child(keyPart: string, token: T | null): TokenNode<T> {
+  child(keyPart: string, token: T | null): Node<T> {
     const child =
       this.#children.get(keyPart) ??
-      new TokenNode(this.dictionary, this, keyPart, token)
+      new Node(this.dictionary, this, keyPart, token)
     this.#children.set(keyPart, child)
 
     return child
