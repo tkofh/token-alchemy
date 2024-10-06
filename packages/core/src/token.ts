@@ -31,4 +31,12 @@ export class Token<T extends DollarPrefix<T>, C = never> {
   format(context: C): string {
     return this.#node.dictionary.format(this.reference(), context)
   }
+
+  references(context: C, depth = 0): ReadonlySet<Token<T, C>> {
+    return this.#node.dictionary.references(this, context, depth)
+  }
+
+  [Symbol.for('nodejs.util.inspect.custom')]() {
+    return `Token ${this.reference()}`
+  }
 }
