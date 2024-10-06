@@ -337,3 +337,5 @@ console.log(
       }),
   ),
 )
+
+console.log(JSON.stringify(dictionary.extract()))

@@ -7,6 +7,7 @@ import type {
   ReferenceCountingContext,
   ReplaceHandler,
   ReplaceInterceptor,
+  TokenKey,
   TokenPredicate,
   TokenReplacer,
   TokenResolver,
@@ -53,7 +54,7 @@ class Dictionary<T extends DollarPrefix<T> = never> {
           continue
         }
 
-        const node = this.#insertNode(parent, key, value)
+        const node = this.#insertNode(parent, key as TokenKey, value)
 
         queue.push([node, value])
 
@@ -166,8 +167,12 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     })()
   }
 
-  #insertNode(parent: Node<T>, key: string, value: T) {
-    if (key.match(KEY_PART_PATTERN) === null) {
+  extract(): TokensInput<T> {
+    return this.#root.extract()
+  }
+
+  #insertNode(parent: Node<T>, key: TokenKey, value: T) {
+    if (String(key).match(KEY_PART_PATTERN) === null) {
       throw new Error(`Invalid key: ${key}`)
     }
 

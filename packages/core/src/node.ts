@@ -1,5 +1,5 @@
 import type { Dictionary } from './dictionary'
-import type { DollarPrefix } from './types'
+import type { DollarPrefix, TokenInput, TokenKey, TokensInput } from './types'
 
 type TokenParent<T extends DollarPrefix<T>> = Node<T> | null
 
@@ -7,14 +7,14 @@ export class Node<T extends DollarPrefix<T>> {
   readonly dictionary: Dictionary<T>
   readonly token: T | null
   readonly #parent: TokenParent<T>
-  readonly #keyPart: string | null
+  readonly #keyPart: TokenKey | null
 
-  readonly #children = new Map<string, Node<T>>()
+  readonly #children = new Map<TokenKey, Node<T>>()
 
   constructor(
     dictionary: Dictionary<T>,
     parent: Node<T> | null = null,
-    keyPart: string | null = null,
+    keyPart: TokenKey | null = null,
     token: T | null = null,
   ) {
     this.dictionary = dictionary
@@ -36,10 +36,10 @@ export class Node<T extends DollarPrefix<T>> {
       return this.#parent.keyParts()
     }
 
-    return this.#parent.keyParts().concat(this.#keyPart)
+    return this.#parent.keyParts().concat(String(this.#keyPart))
   }
 
-  child(keyPart: string, token: T | null): Node<T> {
+  child(keyPart: TokenKey, token: T | null): Node<T> {
     const child =
       this.#children.get(keyPart) ??
       new Node(this.dictionary, this, keyPart, token)
@@ -48,7 +48,17 @@ export class Node<T extends DollarPrefix<T>> {
     return child
   }
 
-  // extract():  {
-  //
-  // }
+  extract(): TokensInput<T> {
+    const result: TokensInput<T> = {} as TokensInput<T>
+
+    for (const [key, child] of this.#children) {
+      result[key] = child.extract() as TokenInput<T>
+    }
+
+    if (this.token) {
+      Object.assign(result, this.token)
+    }
+
+    return result
+  }
 }
