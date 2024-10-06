@@ -64,24 +64,6 @@ type TokenPrefix =
 
 export type TokenKey = `${TokenPrefix}${string}` | number
 
-type EnsureKeyDollarPrefix<Key> = Key extends `$${string}`
-  ? Key
-  : Key extends string
-    ? `$${Key}`
-    : never
-
-type StripKeyDollarPrefix<PrefixedKey> = PrefixedKey extends `$${infer Key}`
-  ? Key
-  : PrefixedKey
-
-type DollarPrefixValue<Object, Key extends string> = Object extends {
-  [K in EnsureKeyDollarPrefix<Key>]: infer Value
-}
-  ? Value
-  : Object extends { [K in StripKeyDollarPrefix<Key>]: infer Value }
-    ? Value
-    : never
-
-export type DollarPrefix<Object> = {
-  [K in EnsureKeyDollarPrefix<keyof Object>]: DollarPrefixValue<Object, K>
+export type DollarPrefix<T extends object> = {
+  [K in keyof T]: K extends `$${string}` ? T[K] : never
 }
