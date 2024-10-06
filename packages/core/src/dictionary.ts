@@ -2,11 +2,8 @@ import { Node } from './node'
 import { Token } from './token'
 import type {
   DollarPrefix,
+  FormatHelpers,
   Formatter,
-  FormattingContext,
-  ReferenceCountingContext,
-  ReplaceHandler,
-  ReplaceInterceptor,
   TokenKey,
   TokenPredicate,
   TokenReplacer,
@@ -33,8 +30,6 @@ class Dictionary<T extends DollarPrefix<T> = never> {
   readonly #tokens = new Map<string, Token<T>>()
   readonly #root = new Node<T>(this)
   readonly #options: DictionaryOptions<T>
-
-  #isFormatting = false
 
   constructor(options: Partial<DictionaryOptions<T>> = {}) {
     this.#options = {
@@ -67,6 +62,9 @@ class Dictionary<T extends DollarPrefix<T> = never> {
 
   /**
    * Try to resolve a token by its alias. Returns `undefined` if the token is not found.
+   *
+   * When this method is called while the dictionary is formatting a token, or collecting its references, it will throw an error if a circular reference is detected.
+   *
    * @param alias The alias of the token to resolve.
    */
   tryResolve(alias: string): Token<T> | undefined {
@@ -75,6 +73,9 @@ class Dictionary<T extends DollarPrefix<T> = never> {
 
   /**
    * Resolve a token by its alias. Throws an error if the token is not found.
+   *
+   * When this method is called while the dictionary is formatting a token, or collecting its references, it will throw an error if a circular reference is detected.
+   *
    * @param alias The alias of the token to resolve.
    */
   resolve(alias: string): Token<T> {
@@ -87,30 +88,24 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     return token
   }
 
+  /**
+   * Format a token by its reference using a formatter function.
+   * @param reference The reference to the token to format.
+   * @param formatter The formatter function to use.
+   */
   format(reference: string, formatter: Formatter<T>): string
+  /**
+   * Format a token using a formatter function.
+   * @param token The token to format.
+   * @param formatter The formatter function to use.
+   */
   format(token: Token<T>, formatter: Formatter<T>): string
   format(input: Token<T> | string, formatter: Formatter<T>) {
-    if (this.#isFormatting) {
-      throw new Error('Cannot format while formatting')
-    }
-    this.#isFormatting = true
     const token = typeof input === 'string' ? this.resolve(input) : input
 
-    const resolve = this.#createResolver(new Set([token]))
-    const replace = this.#createReplacer(resolve)
+    const { helpers } = this.#createHelpers(token)
 
-    const result = this.#format(
-      {
-        token,
-        resolve,
-        replace,
-      },
-      formatter,
-    )
-
-    this.#isFormatting = false
-
-    return result
+    return this.#format(formatter, token, helpers, 0, Number.POSITIVE_INFINITY)
   }
 
   references(
@@ -128,32 +123,19 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     formatter: Formatter<T>,
     depth = 0,
   ): ReadonlySet<Token<T>> {
-    if (this.#isFormatting) {
-      throw new Error('Cannot format while formatting')
-    }
-    this.#isFormatting = true
-
     const token = typeof input === 'string' ? this.resolve(input) : input
 
-    const references = new Set<Token<T>>()
+    const { visited, helpers } = this.#createHelpers(token)
 
-    const resolve = this.#createResolver(references)
-    const replace = this.#createReplacer(resolve)
-
-    this.#countReferences(
-      {
-        token,
-        depth: 0,
-        maxDepth: depth <= 0 ? Number.POSITIVE_INFINITY : depth,
-        resolve,
-        replace,
-      },
+    this.#format(
       formatter,
+      token,
+      helpers,
+      0,
+      depth <= 0 ? Number.POSITIVE_INFINITY : depth,
     )
 
-    this.#isFormatting = false
-
-    return references
+    return visited
   }
 
   filter(predicate: TokenPredicate<T>): IterableIterator<Token<T>> {
@@ -214,62 +196,59 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     this.#tokens.set(tokenReference, token)
   }
 
-  #createResolver(visited?: Set<Token<T>>) {
-    return (reference: string) => {
+  #createHelpers(token: Token<T>) {
+    const visited = new Set<Token<T>>([token])
+
+    const resolve: TokenResolver<T> = (reference) => {
       const token = this.resolve(reference)
 
-      if (visited) {
-        if (visited.has(token)) {
-          throw new Error(
-            `Circular reference: ${Array.from(visited, (token) => token.path()).join(' -> ')} -> ${token.path()}`,
-          )
-        }
-
-        visited.add(token)
+      if (visited.has(token)) {
+        throw new Error(
+          `Circular reference: ${Array.from(visited, (token) => token.path()).join(' -> ')} -> ${token.path()}`,
+        )
       }
+
+      visited.add(token)
+
       return token
     }
-  }
 
-  #createReplacer(
-    resolver: TokenResolver<T>,
-    interceptor?: ReplaceInterceptor<T>,
-  ): TokenReplacer<T> {
-    return (formatted: string, replace: ReplaceHandler<T>) => {
+    const replace: TokenReplacer<T> = (formatted, replace) => {
       return formatted.replace(REFERENCE_PATTERN, (reference) => {
-        const token = resolver(reference)
+        const token = resolve(reference)
 
-        return interceptor ? interceptor(replace, token) : replace(token)
+        return replace(token)
       })
     }
+
+    return {
+      visited,
+      helpers: {
+        token,
+
+        resolve,
+        replace,
+      },
+    }
   }
 
-  #format(context: FormattingContext<T>, formatter: Formatter<T>): string {
-    const result = formatter(context)
-
-    return result.replace(REFERENCE_PATTERN, (reference) => {
-      const token = context.resolve(reference)
-
-      return this.#format({ ...context, token }, formatter)
-    })
-  }
-
-  #countReferences(
-    context: ReferenceCountingContext<T>,
+  #format(
     formatter: Formatter<T>,
-  ) {
-    if (context.depth >= context.maxDepth) {
-      return
+    token: Token<T>,
+    helpers: FormatHelpers<T>,
+    depth: number,
+    maxDepth: number,
+  ): string {
+    const result = formatter(token, helpers)
+
+    if (depth >= maxDepth) {
+      return result
     }
 
-    const result = formatter(context)
+    return result.replace(REFERENCE_PATTERN, (reference) => {
+      const token = helpers.resolve(reference)
 
-    result.replace(REFERENCE_PATTERN, (reference) => {
-      context.resolve(reference)
-
-      this.#countReferences({ ...context, depth: context.depth + 1 }, formatter)
-
-      return reference
+      return this.#format(formatter, token, helpers, depth + 1, maxDepth)
     })
   }
 }

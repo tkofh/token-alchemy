@@ -31,17 +31,6 @@ export type DollarPrefix<T extends object> = {
   [K in keyof T]: K extends `$${string}` ? T[K] : never
 }
 
-export type ReplaceInterceptor<T extends DollarPrefix<T>> = (
-  handler: ReplaceHandler<T>,
-  token: Token<T>,
-) => string
-
-export interface ReferenceCountingContext<T extends DollarPrefix<T>>
-  extends FormattingContext<T> {
-  readonly depth: number
-  readonly maxDepth: number
-}
-
 export type TokenResolver<T extends DollarPrefix<T>> = (
   reference: string,
 ) => Token<T>
@@ -55,14 +44,14 @@ export type TokenReplacer<T extends DollarPrefix<T>> = (
   handler: ReplaceHandler<T>,
 ) => string
 
-export interface FormattingContext<T extends DollarPrefix<T>> {
-  readonly token: Token<T>
+export interface FormatHelpers<T extends DollarPrefix<T>> {
   readonly resolve: TokenResolver<T>
   readonly replace: TokenReplacer<T>
 }
 
 export type Formatter<T extends DollarPrefix<T>> = (
-  api: FormattingContext<T>,
+  token: Token<T>,
+  helpers: FormatHelpers<T>,
 ) => string
 
 export type TokenPredicate<T extends DollarPrefix<T>> = (

@@ -1,4 +1,5 @@
 import { createDictionary } from './dictionary'
+import type { Formatter } from './types'
 
 const orderedTiers = [
   'system',
@@ -30,7 +31,9 @@ interface ColorToken extends BaseToken {
   $value: Modal<string>
 }
 
-const dictionary = createDictionary<BaseToken | DimensionToken | ColorToken>({
+type Token = BaseToken | DimensionToken | ColorToken
+
+const dictionary = createDictionary<Token>({
   validator: (tokenData, parentData) => {
     if (parentData) {
       const parentIndex = orderedTiers.indexOf(parentData.$tier)
@@ -322,20 +325,19 @@ dictionary.insert({
   },
 })
 
+console.log(JSON.stringify(dictionary.extract()))
+
+const formatter: Formatter<Token> = (token) => {
+  const data = token.data()
+
+  return String(
+    typeof data.$value === 'object' ? data.$value.light : data.$value,
+  )
+}
+
 console.log(
   Array.from(
     dictionary.filter((token) => token.data().$type === 'color'),
-    (token) =>
-      token.format(({ token, replace }) => {
-        const data = token.data()
-
-        const value = String(
-          typeof data.$value === 'object' ? data.$value.light : data.$value,
-        )
-
-        return replace(value, (token) => `var(--${token.key()})`)
-      }),
+    (token) => token.format(formatter),
   ),
 )
-
-console.log(JSON.stringify(dictionary.extract()))
