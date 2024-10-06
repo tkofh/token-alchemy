@@ -273,25 +273,12 @@ export class Dictionary<T extends DollarPrefix<T> = never> {
     interceptor?: TokenReplaceInterceptor<T>,
   ): TokenReplacer<T> {
     return (formatted: string, replace: TokenReplaceHandler<T>) => {
-      if (interceptor) {
-        return this.#replace(resolver, formatted, (token) =>
-          interceptor(replace, token),
-        )
-      }
-      return this.#replace(resolver, formatted, replace)
+      return formatted.replace(REFERENCE_PATTERN, (reference) => {
+        const token = resolver(reference)
+
+        return interceptor ? interceptor(replace, token) : replace(token)
+      })
     }
-  }
-
-  #replace(
-    resolver: TokenResolver<T>,
-    formatted: string,
-    replace: TokenReplaceHandler<T>,
-  ): string {
-    return formatted.replace(REFERENCE_PATTERN, (reference) => {
-      const token = resolver(reference)
-
-      return replace(token)
-    })
   }
 
   #format(api: FormattingContext<T>, formatter: Formatter<T>): string {
