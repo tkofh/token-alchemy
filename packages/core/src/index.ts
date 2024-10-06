@@ -322,3 +322,10 @@ dictionary.insert({
 })
 
 console.log(dictionary.references('{color.overlay}', { mode: 'light' }))
+
+console.log(
+  Array.from(
+    dictionary.filter((token) => token.data().$type === 'color'),
+    (token) => token.key(),
+  ),
+)

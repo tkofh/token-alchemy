@@ -61,6 +61,10 @@ type ReferenceCountingContext<T extends DollarPrefix<T>, C> = FormattingContext<
   readonly maxDepth: number
 }
 
+type TokenPredicate<T extends DollarPrefix<T>, C> = (
+  token: Token<T, C>,
+) => boolean
+
 export type DictionaryOptions<T extends DollarPrefix<T>, C> = {
   formatter: Formatter<T, C>
 }
@@ -199,6 +203,17 @@ export class Dictionary<T extends DollarPrefix<T>, C = never> {
     this.#isFormatting = false
 
     return references
+  }
+
+  filter(predicate: TokenPredicate<T, C>): IterableIterator<Token<T, C>> {
+    const tokens = this.#tokens
+    return (function* () {
+      for (const token of tokens.values()) {
+        if (predicate(token)) {
+          yield token
+        }
+      }
+    })()
   }
 
   #insertToken(node: TokenNode<T, C>) {
