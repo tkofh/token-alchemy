@@ -341,3 +341,5 @@ console.log(
     (token) => token.format(formatter),
   ),
 )
+
+console.log(dictionary.references('{color.overlay}', formatter, 2))

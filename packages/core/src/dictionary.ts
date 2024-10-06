@@ -135,6 +135,8 @@ class Dictionary<T extends DollarPrefix<T> = never> {
       depth <= 0 ? Number.POSITIVE_INFINITY : depth,
     )
 
+    visited.delete(token)
+
     return visited
   }
 
@@ -239,11 +241,11 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     depth: number,
     maxDepth: number,
   ): string {
-    const result = formatter(token, helpers)
-
     if (depth >= maxDepth) {
-      return result
+      return token.reference()
     }
+
+    const result = formatter(token, helpers)
 
     return result.replace(REFERENCE_PATTERN, (reference) => {
       const token = helpers.resolve(reference)
