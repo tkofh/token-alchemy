@@ -325,7 +325,7 @@ dictionary.insert({
   },
 })
 
-console.log(JSON.stringify(dictionary.extract()))
+// console.log(JSON.stringify(dictionary.extract()))
 
 const formatter: Formatter<Token> = (token) => {
   const data = token.data()
@@ -335,11 +335,13 @@ const formatter: Formatter<Token> = (token) => {
   )
 }
 
-console.log(
-  Array.from(
-    dictionary.filter((token) => token.data().$type === 'color'),
-    (token) => token.format(formatter),
-  ),
-)
+// console.log(
+//   Array.from(
+//     dictionary.filter((token) => token.data().$type === 'color'),
+//     (token) => token.format(formatter),
+//   ),
+// )
 
-console.log(dictionary.references('{color.overlay}', formatter, 2))
+console.log(dictionary.sortByReference(formatter))
+
+// console.log(dictionary.references('{color.overlay}', formatter, 2))

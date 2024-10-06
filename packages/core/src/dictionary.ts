@@ -108,11 +108,23 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     return this.#format(formatter, token, helpers, 0, Number.POSITIVE_INFINITY)
   }
 
+  /**
+   * Collect all references of a token by its reference using a formatter function.
+   * @param reference The reference to the token to collect references from.
+   * @param formatter The formatter function to use.
+   * @param depth The maximum depth of references to collect. Defaults to `0` (infinite).
+   */
   references(
     reference: string,
     formatter: Formatter<T>,
     depth?: number,
   ): ReadonlySet<Token<T>>
+  /**
+   * Collect all references of a token using a formatter function.
+   * @param token The token to collect references from.
+   * @param formatter The formatter function to use.
+   * @param depth The maximum depth of references to collect. Defaults to `0` (infinite).
+   */
   references(
     token: Token<T>,
     formatter: Formatter<T>,
@@ -140,6 +152,10 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     return visited
   }
 
+  /**
+   * Filter tokens using a predicate function.
+   * @param predicate The predicate function to use.
+   */
   filter(predicate: TokenPredicate<T>): IterableIterator<Token<T>> {
     const tokens = this.#tokens
     return (function* () {
@@ -151,8 +167,65 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     })()
   }
 
+  /**
+   * Extract all tokens from the dictionary.
+   */
   extract(): TokensInput<T> {
     return this.#root.extract()
+  }
+
+  sortByReference(formatter: Formatter<T>): ReadonlyArray<Token<T>>
+  sortByReference(
+    tokens: IterableIterator<Token<T>>,
+    formatter: Formatter<T>,
+  ): ReadonlyArray<Token<T>>
+  sortByReference(
+    predicate: TokenPredicate<T>,
+    formatter: Formatter<T>,
+  ): ReadonlyArray<Token<T>>
+  sortByReference(
+    a: Formatter<T> | IterableIterator<Token<T>> | TokenPredicate<T>,
+    b?: Formatter<T>,
+  ): ReadonlyArray<Token<T>> {
+    const formatter: Formatter<T> = b ?? (a as Formatter<T>)
+    const tokens = Array.from(
+      b === undefined
+        ? this.#tokens.values()
+        : typeof a === 'function'
+          ? this.filter(a as TokenPredicate<T>)
+          : a,
+    )
+
+    const references = new Map<Token<T>, ReadonlySet<Token<T>>>()
+    for (const token of tokens) {
+      references.set(token, this.references(token, formatter))
+    }
+
+    return tokens.toSorted((a, b) => {
+      const aRefs = references.get(a) as ReadonlySet<Token<T>>
+      const bRefs = references.get(b) as ReadonlySet<Token<T>>
+
+      const aComesFirst = -1
+      const bComesFirst = 1
+
+      if (aRefs.size === 0) {
+        return aComesFirst
+      }
+
+      if (bRefs.size === 0) {
+        return bComesFirst
+      }
+
+      if (aRefs.has(b)) {
+        return bComesFirst
+      }
+
+      if (bRefs.has(a)) {
+        return aComesFirst
+      }
+
+      return 0
+    })
   }
 
   #insertNode(parent: Node<T>, key: TokenKey, value: T) {
