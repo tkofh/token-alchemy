@@ -1,6 +1,6 @@
 {
-  "name": "@token-alchemy/core",
-  "version": "1.0.1",
+  "name": "token-alchemy",
+  "version": "0.0.0",
   "description": "Core Token resolution utilities",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
@@ -9,17 +9,16 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "types": "./dist/index.d.ts"
     }
   },
-  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "run": "tsx ./src/index.ts",
     "build": "unbuild",
     "test:watch": "vitest",
     "test": "vitest run"
@@ -36,6 +35,7 @@
   },
   "dependencies": {
     "@token-alchemy/types": "workspace:*",
+    "change-case": "^5.4.4",
     "defu": "^6.1.4",
     "lodash-es": "^4.17.21",
     "zod": "^3.23.8"

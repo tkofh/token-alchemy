@@ -35,6 +35,9 @@ importers:
       '@token-alchemy/types':
         specifier: workspace:*
         version: link:../types
+      change-case:
+        specifier: ^5.4.4
+        version: 5.4.4
       defu:
         specifier: ^6.1.4
         version: 6.1.4
@@ -1181,6 +1184,9 @@ packages:
   chalk@5.3.0:
     resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+
+  change-case@5.4.4:
+    resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
 
   changelogen@0.5.5:
     resolution: {integrity: sha512-IzgToIJ/R9NhVKmL+PW33ozYkv53bXvufDNUSH3GTKXq1iCHGgkbgbtqEWbo8tnWNnt7nPDpjL8PwSG2iS8RVw==}
@@ -3674,6 +3680,8 @@ snapshots:
       supports-color: 5.5.0
 
   chalk@5.3.0: {}
+
+  change-case@5.4.4: {}
 
   changelogen@0.5.5:
     dependencies:
