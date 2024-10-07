@@ -27,6 +27,8 @@ export type TokensInput<T extends DollarPrefix<T>> = Record<
 
 export type TokenKey = `${TokenPrefix}${string}` | number
 
+export type PropertyKey = `$${string}`
+
 export type DollarPrefix<T extends object> = {
   [K in keyof T]: K extends `$${string}` ? T[K] : never
 }
@@ -57,3 +59,9 @@ export type Formatter<T extends DollarPrefix<T>> = (
 export type TokenPredicate<T extends DollarPrefix<T>> = (
   token: Token<T>,
 ) => boolean
+
+export type TokenValueData<T extends DollarPrefix<T>> = T extends {
+  $value: unknown
+}
+  ? T
+  : never

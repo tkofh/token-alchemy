@@ -8,6 +8,7 @@ import type {
   TokenPredicate,
   TokenReplacer,
   TokenResolver,
+  TokenValueData,
   TokensInput,
 } from './types'
 
@@ -56,6 +57,21 @@ class Dictionary<T extends DollarPrefix<T> = never> {
         if ('$value' in value && value.$value !== undefined) {
           this.#insertToken(node)
         }
+      }
+    }
+  }
+
+  override(tokens: TokensInput<Partial<Pick<TokenValueData<T>, '$value'>>>) {
+    const changed = this.#root.override(tokens, '$value')
+    for (const child of changed) {
+      const result = this.#options.validator(
+        child.token as T,
+        child.parent?.token ?? null,
+      )
+      if (!result.valid) {
+        throw new Error(
+          `Invalid token data: ${child.keyParts().join('/')} (${result.reason})`,
+        )
       }
     }
   }

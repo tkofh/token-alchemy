@@ -1,9 +1,5 @@
 import type { Node } from './node'
-import type { DollarPrefix, Formatter } from './types'
-
-type TokenValueData<T extends DollarPrefix<T>> = T extends { $value: unknown }
-  ? T
-  : never
+import type { DollarPrefix, Formatter, TokenValueData } from './types'
 
 export class Token<T extends DollarPrefix<T>> {
   readonly #node: Node<T>

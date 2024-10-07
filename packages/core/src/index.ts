@@ -344,4 +344,16 @@ const formatter: Formatter<Token> = (token) => {
 
 console.log(dictionary.sortByReference(formatter))
 
+dictionary.override({
+  color: {
+    gray: {
+      1: {
+        $value: 'blue',
+      },
+    },
+  },
+})
+
+console.log(dictionary.format('{color.gray.1}', formatter))
+
 // console.log(dictionary.references('{color.overlay}', formatter, 2))
