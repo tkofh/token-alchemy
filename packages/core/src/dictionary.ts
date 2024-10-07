@@ -217,7 +217,7 @@ class Dictionary<T extends DollarPrefix<T> = never> {
       references.set(token, this.references(token, formatter))
     }
 
-    return tokens.toSorted((a, b) => {
+    tokens.sort((a, b) => {
       const aRefs = references.get(a) as ReadonlySet<Token<T>>
       const bRefs = references.get(b) as ReadonlySet<Token<T>>
 
@@ -242,6 +242,8 @@ class Dictionary<T extends DollarPrefix<T> = never> {
 
       return 0
     })
+
+    return tokens
   }
 
   #insertNode(parent: Node<T>, key: TokenKey, value: T) {
