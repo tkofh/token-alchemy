@@ -4,7 +4,6 @@ import type {
   PropertyKey,
   TokenInput,
   TokenKey,
-  TokenValueData,
   TokensInput,
 } from './types'
 
@@ -70,7 +69,9 @@ export class Node<T extends DollarPrefix<T>> {
   }
 
   override(
-    tokens: Partial<Pick<TokenValueData<T>, '$value'>>,
+    tokens: TokensInput<
+      Partial<Pick<Extract<T, { $value: unknown }>, '$value'>>
+    >,
     property: PropertyKey,
   ) {
     const changed = new Set<Node<T>>()

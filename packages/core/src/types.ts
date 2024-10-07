@@ -60,8 +60,13 @@ export type TokenPredicate<T extends DollarPrefix<T>> = (
   token: Token<T>,
 ) => boolean
 
-export type TokenValueData<T extends DollarPrefix<T>> = T extends {
-  $value?: unknown
-}
-  ? T
+type Each<T extends DollarPrefix<T>> = Extract<
+  Required<T>,
+  { $value: unknown }
+> extends never
+  ? never
+  : T
+
+export type TokenValueData<T extends DollarPrefix<T>> = T extends unknown
+  ? Each<T>
   : never

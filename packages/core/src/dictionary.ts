@@ -8,7 +8,6 @@ import type {
   TokenPredicate,
   TokenReplacer,
   TokenResolver,
-  TokenValueData,
   TokensInput,
 } from './types'
 
@@ -61,7 +60,11 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     }
   }
 
-  override(tokens: TokensInput<Partial<Pick<TokenValueData<T>, '$value'>>>) {
+  override(
+    tokens: TokensInput<
+      Partial<Pick<Extract<T, { $value: unknown }>, '$value'>>
+    >,
+  ) {
     const changed = this.#root.override(tokens, '$value')
     for (const child of changed) {
       const result = this.#options.validator(

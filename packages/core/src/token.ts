@@ -6,7 +6,7 @@ import {
   snakeCase,
 } from 'change-case'
 import type { Node } from './node'
-import type { DollarPrefix, Formatter, TokenValueData } from './types'
+import type { DollarPrefix, Formatter } from './types'
 
 type Casing = 'kebab' | 'camel' | 'pascal' | 'snake' | 'constant'
 
@@ -33,8 +33,8 @@ export class Token<T extends DollarPrefix<T>> {
     }
   }
 
-  data(): TokenValueData<T> {
-    return this.#node.token as TokenValueData<T>
+  data(): Extract<T, { $value?: unknown }> {
+    return this.#node.token as Extract<T, { $value?: unknown }>
   }
 
   reference(): string {
