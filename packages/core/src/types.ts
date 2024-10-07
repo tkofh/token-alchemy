@@ -61,7 +61,7 @@ export type TokenPredicate<T extends DollarPrefix<T>> = (
 ) => boolean
 
 export type TokenValueData<T extends DollarPrefix<T>> = T extends {
-  $value: unknown
+  $value?: unknown
 }
   ? T
   : never
