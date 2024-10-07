@@ -1,5 +1,11 @@
 # @token-alchemy/core
 
+## 0.0.1
+
+### Patch Changes
+
+- b321e78: implement basic token dictionary api
+
 ## 1.0.1
 
 ### Patch Changes

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.5.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.9.3/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -15,14 +15,25 @@
       "recommended": true,
       "complexity": {
         "noExcessiveCognitiveComplexity": "warn",
+        "noUselessTernary": "error",
         "useSimplifiedLogicExpression": "warn"
       },
       "correctness": {
+        "noUnusedImports": "error",
         "noNewSymbol": "error",
         "noUnusedVariables": "warn"
       },
       "style": {
+        "useImportType": "error",
+        "useExportType": "error",
         "noDefaultExport": "error",
+        "useConsistentArrayType": {
+          "fix": "unsafe",
+          "level": "error",
+          "options": {
+            "syntax": "generic"
+          }
+        },
         "noNamespace": "error",
         "useCollapsedElseIf": "error",
         "useBlockStatements": "error",
@@ -30,19 +41,6 @@
       },
       "suspicious": {
         "noApproximativeNumericConstant": "error"
-      },
-      "nursery": {
-        "useImportType": "error",
-        "useExportType": "error",
-        "useGroupedTypeImport": "error",
-        "useConsistentArrayType": {
-          "level": "error",
-          "options": {
-            "syntax": "generic"
-          }
-        },
-        "noUselessTernary": "warn",
-        "noUnusedImports": "error"
       }
     }
   },
@@ -56,6 +54,17 @@
     "formatter": {
       "semicolons": "asNeeded",
       "quoteStyle": "single"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    },
+    "assists": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
     }
   }
 }
