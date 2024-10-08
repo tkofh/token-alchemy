@@ -1,5 +1,21 @@
 # @token-alchemy/core
 
+## 0.0.2
+
+### Patch Changes
+
+- 1a9abc0: add `Symbol.iterator` to `Dictionary`, enabling for loops:
+
+  ```typescript
+  import { createDictionary } from "token-alchemy";
+
+  const dictionary = createDictionary(/* ... */);
+
+  for (const token of dictionary) {
+    // ...
+  }
+  ```
+
 ## 0.0.1
 
 ### Patch Changes

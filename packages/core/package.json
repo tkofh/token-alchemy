@@ -1,6 +1,6 @@
 {
   "name": "token-alchemy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Core Token resolution utilities",
   "author": "Tim Morris <timthewebguy@gmail.com>",
   "license": "MIT",
