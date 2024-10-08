@@ -20,8 +20,15 @@ describe('dictionary', () => {
       },
     )
 
+    for (const token of dictionary) {
+      console.log(token)
+    }
+
     expect(
-      dictionary.format('{test.token}', (token) => token.data().$value),
+      dictionary.format(
+        '{test.token}',
+        (token) => token.data().$value as string,
+      ),
     ).toBe('a b')
   })
 })

@@ -186,6 +186,10 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     })()
   }
 
+  [Symbol.iterator]() {
+    return this.#tokens.values()
+  }
+
   /**
    * Extract all tokens from the dictionary.
    */
