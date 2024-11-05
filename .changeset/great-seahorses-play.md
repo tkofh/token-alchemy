@@ -2,4 +2,4 @@
 "token-alchemy": patch
 ---
 
-export `isReference` utility
+fix sorting algorithm

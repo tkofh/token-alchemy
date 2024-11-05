@@ -216,35 +216,49 @@ class Dictionary<T extends DollarPrefix<T> = never> {
     )
 
     const references = new Map<Token<T>, ReadonlySet<Token<T>>>()
-    for (const token of tokens) {
-      references.set(token, this.references(token, formatter))
+
+    const getRefs = (token: Token<T>) => {
+      const refs = references.get(token) ?? this.references(token, formatter)
+      references.set(token, refs)
+      return refs
     }
 
-    tokens.sort((a, b) => {
-      const aRefs = references.get(a) as ReadonlySet<Token<T>>
-      const bRefs = references.get(b) as ReadonlySet<Token<T>>
-
-      const aComesFirst = -1
-      const bComesFirst = 1
-
-      if (aRefs.size === 0) {
+    const bComesFirst = 1
+    const aComesFirst = -1
+    const sorter = (a?: Token<T>, b?: Token<T>): 1 | -1 | 0 => {
+      if (a === undefined) {
         return aComesFirst
       }
-
-      if (bRefs.size === 0) {
+      if (b === undefined) {
         return bComesFirst
       }
 
-      if (aRefs.has(b)) {
+      const aRefs = getRefs(a)
+      const bRefs = getRefs(b)
+
+      if (aRefs.size > 0 && bRefs.size === 0) {
+        if (aRefs.has(b)) {
+          return bComesFirst
+        }
+        if (bRefs.has(a)) {
+          return aComesFirst
+        }
+
+        return sorter(aRefs.values().next().value, bRefs.values().next().value)
+      }
+
+      if (aRefs.size > 0) {
         return bComesFirst
       }
 
-      if (bRefs.has(a)) {
+      if (bRefs.size > 0) {
         return aComesFirst
       }
 
       return 0
-    })
+    }
+
+    tokens.sort((a, b) => sorter(a, b))
 
     return tokens
   }

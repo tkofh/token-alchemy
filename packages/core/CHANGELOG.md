@@ -1,5 +1,12 @@
 # @token-alchemy/core
 
+## 0.0.3
+
+### Patch Changes
+
+- ac3795c: export `isReference` utility
+- ac3795c: allow only lowercase letters for the beginnings of token segments
+
 ## 0.0.2
 
 ### Patch Changes
