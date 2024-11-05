@@ -1,5 +1,11 @@
 # @token-alchemy/core
 
+## 0.0.4
+
+### Patch Changes
+
+- 4d3e924: fix sorting algorithm
+
 ## 0.0.3
 
 ### Patch Changes

@@ -215,14 +215,6 @@ class Dictionary<T extends DollarPrefix<T> = never> {
           : a,
     )
 
-    const references = new Map<Token<T>, ReadonlySet<Token<T>>>()
-
-    const getRefs = (token: Token<T>) => {
-      const refs = references.get(token) ?? this.references(token, formatter)
-      references.set(token, refs)
-      return refs
-    }
-
     const bComesFirst = 1
     const aComesFirst = -1
     const sorter = (a?: Token<T>, b?: Token<T>): 1 | -1 | 0 => {
@@ -233,10 +225,10 @@ class Dictionary<T extends DollarPrefix<T> = never> {
         return bComesFirst
       }
 
-      const aRefs = getRefs(a)
-      const bRefs = getRefs(b)
+      const aRefs = this.references(a, formatter)
+      const bRefs = this.references(b, formatter)
 
-      if (aRefs.size > 0 && bRefs.size === 0) {
+      if (aRefs.size > 0 && bRefs.size > 0) {
         if (aRefs.has(b)) {
           return bComesFirst
         }
