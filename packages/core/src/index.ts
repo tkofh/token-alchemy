@@ -11,3 +11,4 @@ export {
   type TokensInput,
   type DollarPrefix,
 } from './types'
+export { isReference } from './util'

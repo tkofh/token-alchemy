@@ -1,3 +1,4 @@
+import { KEY_PART_PATTERN, REFERENCE_PATTERN } from './constants'
 import { Node } from './node'
 import { Token } from './token'
 import type {
@@ -10,11 +11,6 @@ import type {
   TokenResolver,
   TokensInput,
 } from './types'
-
-const KEY_PART_PATTERN = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/
-
-const REFERENCE_PATTERN =
-  /({[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)*})/g
 
 type TokenValidator<T extends DollarPrefix<T>> = (
   tokenData: T,
