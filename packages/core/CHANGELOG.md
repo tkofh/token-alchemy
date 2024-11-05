@@ -1,5 +1,11 @@
 # @token-alchemy/core
 
+## 0.0.5
+
+### Patch Changes
+
+- ff83752: fix typo in sorting algorithm
+
 ## 0.0.4
 
 ### Patch Changes
